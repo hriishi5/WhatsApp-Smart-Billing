@@ -4,12 +4,25 @@ const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // Local development
+      "https://YOUR-VERCEL-APP.vercel.app", // Replace after frontend deployment
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ---------------- DATABASE ----------------
 
-const db = new sqlite3.Database("./billing.db");
+const path = require("path");
+
+const db = new sqlite3.Database(
+  path.join(__dirname, "billing.db")
+);
 
 // ---------------- CREATE TABLES ----------------
 
@@ -450,8 +463,8 @@ app.put("/settings", (req, res) => {
 
 // ---------------- START SERVER ----------------
 
-app.listen(5000, () => {
+const PORT = process.env.PORT || 5000;
 
-    console.log("Server Running on Port 5000 🚀");
-
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
