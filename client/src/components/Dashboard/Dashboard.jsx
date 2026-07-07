@@ -1,7 +1,7 @@
 import "./Dashboard.css";
 import { useState } from "react";
 import PendingPaymentsModal from "../PendingPaymentsModal/PendingPaymentsModal";
-import { normalizeItem } from "../../utils/normalizeItem";
+
 function Dashboard({ invoices, onSelectInvoice }) {
   // ---------------- Statistics ----------------
 const [showPendingModal, setShowPendingModal] =
