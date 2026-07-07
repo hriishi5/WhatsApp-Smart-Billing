@@ -29,7 +29,7 @@ function App() {
   const [settings, setSettings] = useState(null);
 
   const loadInvoices = () => {
-    fetch("http://localhost:5000/invoices")
+    fetch(`${import.meta.env.VITE_API_URL}/invoices`)
       .then((res) => res.json())
       .then((data) => {
         setInvoices(data);
@@ -37,11 +37,12 @@ function App() {
       .catch((err) => console.log(err));
   };
   const loadSettings = () => {
-  fetch("http://localhost:5000/settings")
+  fetch(`${import.meta.env.VITE_API_URL}/settings`)
     .then((res) => res.json())
     .then((data) => {
       setSettings(data);
-    });
+    })
+    .catch((err) => console.log(err));
 };
 
   useEffect(() => {
@@ -64,7 +65,7 @@ function App() {
   createdAt: new Date().toISOString(),
 };
 
-    fetch("http://localhost:5000/invoice", {
+    fetch(`${import.meta.env.VITE_API_URL}/invoice`, {
 
   method: "POST",
 
@@ -86,7 +87,7 @@ function App() {
 
       ...newInvoice,
 
-      invoiceId: data.invoiceId,
+      ...data,
 
     };
 
@@ -129,7 +130,7 @@ function App() {
       : "Paid";
 
   await fetch(
-    `http://localhost:5000/invoice/${invoice.invoiceId}`,
+    `${import.meta.env.VITE_API_URL}/invoice/${invoice.invoiceId}`,
     {
       method: "PUT",
       headers: {
@@ -152,11 +153,11 @@ function App() {
 
   const handleDelete = async (invoiceId) => {
     await fetch(
-      `http://localhost:5000/invoice/${invoiceId}`,
-      {
-        method: "DELETE",
-      }
-    );
+        `${import.meta.env.VITE_API_URL}/invoice/${invoiceId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
     setMessages((prev) =>
       prev.filter((msg) => msg.invoiceId !== invoiceId)
