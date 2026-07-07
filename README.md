@@ -37,71 +37,11 @@ Instead of creating invoices manually, simply paste the customer's message and t
 
 ---
 
-# 📸 Screenshots
+# 📸 Application Preview
 
-<table>
-<tr>
-
-<td align="center">
-
-<img src="./client/screenshots/dashboard.png" width="450"/>
-
-### Dashboard
-
-</td>
-
-<td align="center">
-
-<img src="./client/screenshots/smart-invoice.png" width="250"/>
-
-### Smart Invoice
-
-</td>
-
-</tr>
-
-<tr>
-
-<td align="center">
-
-<img src="./client/screenshots/ai-assistant%201.png" width="350"/>
-
-### AI Assistant
-
-</td>
-
-<td align="center">
-
-<img src="./client/screenshots/ai-assistant%202.png" width="350"/>
-
-### Today's Summary
-
-</td>
-
-</tr>
-
-<tr>
-
-<td align="center">
-
-<img src="./client/screenshots/invoice.png" width="250"/>
-
-### Invoice
-
-</td>
-
-<td align="center">
-
-<img src="./client/screenshots/invoice%202.png" width="250"/>
-
-### PDF Invoice
-
-</td>
-
-</tr>
-
-</table>
-
+<p align="center">
+  <img src="./client/screenshots/main-page.png" width="100%">
+</p>
 ---
 
 # 🚀 Features
@@ -205,18 +145,16 @@ http://localhost:5173
 
 # 🚀 Future Scope
 
-- 📦 Inventory Management
+The project is actively evolving with several planned enhancements:
 
-- 📧 Email Invoice Support
-
-- 📊 Sales Report Export
-
-- 👥 Multi-user Authentication
-
-- ☁ Cloud Database
-
-- 📱 Mobile Application
-
+- 📦 Inventory & Stock Management
+- 💳 Automated Payment Verification through payment gateways (Razorpay, PhonePe, Stripe)
+- 📧 Email Invoice & Digital Receipt Generation
+- 📊 Detailed Sales Analytics & Exportable Reports
+- 👥 Multi-user Authentication with Role-Based Access Control
+- ☁️ Cloud Deployment with Real-time Data Synchronization
+- 📱 Native Mobile Application for Android & iOS
+- 🤖 AI-powered Sales Forecasting and Business Recommendations
 ---
 
 <div align="center">
