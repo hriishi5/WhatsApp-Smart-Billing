@@ -40,7 +40,7 @@ Instead of creating invoices manually, simply paste the customer's message and t
 # 📸 Application Preview
 
 <p align="center">
-  <img src="./client/screenshots/main-page.png" width="100%">
+  <img src="./client/screenshots/home-page.png" width="100%">
 </p>
 ---
 
