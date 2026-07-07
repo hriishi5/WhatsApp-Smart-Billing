@@ -1,20 +1,14 @@
 .invoice-card{
+    width:min(100%,520px);
 
-    background:white;
+    margin:auto;
 
-    border-radius:18px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
 
-    padding:25px;
-
-    width:380px;
-
-    box-shadow:0 15px 35px rgba(0,0,0,.12);
-
-    border:1px solid #e5e7eb;
-
-    animation:fadeIn .4s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
-
 @keyframes fadeIn{
 
 from{
@@ -92,7 +86,11 @@ transform:translateY(0);
     margin-bottom:8px;
 
 }
-
+.invoice-panel{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
 .pending-status{
 
     background:#fff7ed;
