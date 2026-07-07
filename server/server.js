@@ -8,7 +8,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // Local development
-      "https://YOUR-VERCEL-APP.vercel.app", // Replace after frontend deployment
+      "https://whats-app-smart-billing.vercel.app/", // Replace after frontend deployment
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
