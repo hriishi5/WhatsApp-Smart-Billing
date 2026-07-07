@@ -1,0 +1,350 @@
+.invoice-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:25px;
+
+    width:380px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.12);
+
+    border:1px solid #e5e7eb;
+
+    animation:fadeIn .4s ease;
+}
+
+@keyframes fadeIn{
+
+from{
+opacity:0;
+transform:translateY(20px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+.invoice-card h2{
+
+    color:#075E54;
+
+    margin-bottom:25px;
+
+    border-bottom:2px solid #ececec;
+
+    padding-bottom:10px;
+
+}
+
+.invoice-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:15px 0;
+
+}
+
+.invoice-row span{
+
+    color:#64748b;
+
+    font-weight:600;
+
+}
+
+.invoice-row strong{
+
+    color:#1e293b;
+
+}
+
+.invoice-items{
+
+    margin:25px 0;
+
+}
+
+.invoice-items h4{
+
+    margin-bottom:12px;
+
+    color:#075E54;
+
+}
+
+.invoice-items ul{
+
+    padding-left:18px;
+
+}
+
+.invoice-items li{
+
+    margin-bottom:8px;
+
+}
+
+.pending-status{
+
+    background:#fff7ed;
+
+    color:#ea580c;
+
+    padding:6px 14px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+}
+
+.paid-status{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+    padding:6px 14px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+}
+
+.qr-section{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin:25px 0;
+
+}
+
+.qr-section p{
+
+    color:#475569;
+
+    font-size:14px;
+
+}
+
+.upi-id{
+
+    font-weight:bold;
+
+    color:#075E54;
+
+}
+
+.download-btn,
+.paid-btn,
+.delete-btn{
+
+    width:100%;
+
+    border:none;
+
+    border-radius:12px;
+
+    padding:14px;
+
+    margin-top:12px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.25s;
+}
+
+.download-btn{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.download-btn:hover{
+
+    background:#1d4ed8;
+
+}
+
+.paid-btn{
+
+    background:#22c55e;
+
+    color:white;
+
+}
+
+.paid-btn:hover{
+
+    background:#16a34a;
+
+}
+
+.delete-btn{
+
+    background:#ef4444;
+
+    color:white;
+
+}
+
+.delete-btn:hover{
+
+    background:#dc2626;
+
+}
+
+@media(max-width:900px){
+
+.invoice-card{
+
+width:100%;
+
+}
+
+}
+.empty-invoice{
+
+height:100%;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+text-align:center;
+
+color:#64748b;
+
+min-height:650px;
+
+}
+
+.empty-icon{
+
+font-size:80px;
+
+margin-bottom:25px;
+
+opacity:.5;
+
+}
+
+.empty-invoice h2{
+
+color:#075E54;
+
+margin-bottom:15px;
+
+}
+
+.empty-invoice p{
+
+width:75%;
+
+line-height:1.8;
+
+}
+.reminder-btn{
+
+width:100%;
+
+padding:14px;
+
+margin-top:12px;
+
+background:#128C7E;
+
+border:none;
+
+color:white;
+
+font-size:15px;
+
+font-weight:600;
+
+border-radius:12px;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.reminder-btn:hover{
+
+background:#075E54;
+
+}
+.status-btn{
+
+width:100%;
+
+margin-top:16px;
+
+padding:14px;
+
+border:none;
+
+border-radius:12px;
+
+font-size:16px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+color:white;
+
+}
+
+.confirm{
+
+background:#16a34a;
+
+}
+
+.confirm:hover{
+
+background:#15803d;
+
+}
+
+.reopen{
+
+background:#f59e0b;
+
+}
+
+.reopen:hover{
+
+background:#d97706;
+
+}

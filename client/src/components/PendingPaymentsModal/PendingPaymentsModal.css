@@ -1,0 +1,338 @@
+/* ===========================================
+   Overlay
+=========================================== */
+
+.pending-modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(5px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+    animation:fadeIn .25s ease;
+}
+
+/* ===========================================
+   Modal
+=========================================== */
+
+.pending-modal{
+    width:700px;
+    max-width:95%;
+    max-height:85vh;
+
+    background:#fff;
+
+    border-radius:20px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    animation:slideUp .3s ease;
+}
+
+/* ===========================================
+   Header
+=========================================== */
+
+.pending-modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:20px 25px;
+
+    border-bottom:1px solid #edf2f7;
+
+}
+
+.pending-modal-header h2{
+
+    margin:0;
+
+    color:#075E54;
+
+    font-size:24px;
+
+}
+
+.close-btn{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    transition:.25s;
+
+}
+
+.close-btn:hover{
+
+    background:#e2e8f0;
+
+}
+
+/* ===========================================
+   Search
+=========================================== */
+
+.pending-search{
+
+    margin:20px;
+
+    padding:14px 18px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    outline:none;
+
+    transition:.25s;
+
+}
+
+.pending-search:focus{
+
+    border-color:#075E54;
+
+    box-shadow:0 0 0 4px rgba(7,94,84,.08);
+
+}
+
+/* ===========================================
+   List
+=========================================== */
+
+.pending-modal-list{
+
+    padding:0 20px 20px;
+
+    overflow-y:auto;
+
+}
+
+/* Scroll */
+
+.pending-modal-list::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.pending-modal-list::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:20px;
+
+}
+
+/* ===========================================
+   Card
+=========================================== */
+
+.pending-modal-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px;
+
+    margin-bottom:14px;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    background:white;
+
+}
+
+.pending-modal-card:hover{
+
+    border-color:#075E54;
+
+    background:#f8fafc;
+
+    transform:translateY(-2px);
+
+}
+
+.pending-info h4{
+
+    margin:0;
+
+    color:#111827;
+
+    font-size:18px;
+
+}
+
+.pending-info p{
+
+    margin:6px 0;
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+.pending-info small{
+
+    color:#94a3b8;
+
+}
+
+.pending-right{
+
+    text-align:right;
+
+}
+
+.pending-right h3{
+
+    margin:0;
+
+    color:#111827;
+
+    font-size:22px;
+
+}
+
+.pending-right span{
+
+    display:block;
+
+    margin-top:8px;
+
+    color:#dc2626;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+/* ===========================================
+   Empty State
+=========================================== */
+
+.no-result{
+
+    text-align:center;
+
+    padding:60px 20px;
+
+    color:#94a3b8;
+
+    font-size:16px;
+
+}
+
+/* ===========================================
+   Animations
+=========================================== */
+
+@keyframes slideUp{
+
+    from{
+
+        transform:translateY(40px);
+
+        opacity:0;
+
+    }
+
+    to{
+
+        transform:translateY(0);
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+/* ===========================================
+   Mobile
+=========================================== */
+
+@media(max-width:768px){
+
+.pending-modal{
+
+    width:95%;
+
+}
+
+.pending-modal-card{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+}
+
+.pending-right{
+
+    width:100%;
+
+    text-align:left;
+
+}
+
+.pending-search{
+
+    margin:15px;
+
+}
+
+}

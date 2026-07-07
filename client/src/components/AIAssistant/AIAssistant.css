@@ -1,0 +1,616 @@
+/* ===========================================
+   Floating AI Button
+=========================================== */
+
+.ai-floating-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+
+  width: 65px;
+  height: 65px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: linear-gradient(135deg, #0f766e, #075e54);
+
+  color: white;
+
+  font-size: 30px;
+
+  cursor: pointer;
+
+  box-shadow: 0 12px 30px rgba(7, 94, 84, .35);
+
+  transition: .3s;
+
+  z-index: 999;
+}
+
+.ai-floating-btn:hover {
+
+  transform: scale(1.08);
+
+  box-shadow: 0 18px 35px rgba(7,94,84,.45);
+
+}
+
+/* ===========================================
+   Overlay
+=========================================== */
+
+.ai-overlay{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.45);
+
+backdrop-filter:blur(5px);
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+z-index:1000;
+
+animation:fadeIn .25s ease;
+
+}
+
+/* ===========================================
+   Modal
+=========================================== */
+
+.ai-modal{
+
+width:520px;
+
+max-width:92%;
+
+background:white;
+
+border-radius:24px;
+
+padding:28px;
+
+box-shadow:0 25px 60px rgba(0,0,0,.25);
+
+animation:slideUp .35s ease;
+
+}
+
+/* ===========================================
+   Header
+=========================================== */
+
+.ai-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.ai-header h2{
+
+margin:0;
+
+font-size:28px;
+
+color:#075E54;
+
+font-weight:700;
+
+}
+
+.ai-header button{
+
+width:38px;
+
+height:38px;
+
+border:none;
+
+border-radius:10px;
+
+background:#f1f5f9;
+
+cursor:pointer;
+
+font-size:18px;
+
+transition:.2s;
+
+}
+
+.ai-header button:hover{
+
+background:#e2e8f0;
+
+}
+
+/* ===========================================
+   Greeting
+=========================================== */
+
+.ai-modal>p{
+
+margin:0 0 22px;
+
+font-size:17px;
+
+line-height:1.7;
+
+color:#334155;
+
+}
+
+/* ===========================================
+   Summary Cards
+=========================================== */
+
+.summary-card{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:16px 18px;
+
+margin-bottom:14px;
+
+background:#f8fafc;
+
+border-radius:14px;
+
+transition:.25s;
+
+border:1px solid transparent;
+
+}
+
+.summary-card:hover{
+
+border-color:#0f766e;
+
+background:white;
+
+transform:translateX(3px);
+
+}
+
+.summary-card span{
+
+font-size:15px;
+
+color:#64748b;
+
+}
+
+.summary-card strong{
+
+font-size:18px;
+
+color:#111827;
+
+}
+
+/* ===========================================
+   Recommendation
+=========================================== */
+
+.recommendation{
+
+margin-top:25px;
+
+padding:20px;
+
+background:#ecfdf5;
+
+border-left:5px solid #10b981;
+
+border-radius:14px;
+
+}
+
+.recommendation h4{
+
+margin:0 0 10px;
+
+font-size:18px;
+
+color:#065f46;
+
+}
+
+.recommendation p{
+
+margin:0;
+
+font-size:15px;
+
+line-height:1.7;
+
+color:#334155;
+
+}
+
+/* ===========================================
+   Loading
+=========================================== */
+
+.ai-loading{
+
+padding:60px 0;
+
+text-align:center;
+
+}
+
+.loader{
+
+width:55px;
+
+height:55px;
+
+border-radius:50%;
+
+border:5px solid #d1fae5;
+
+border-top-color:#0f766e;
+
+margin:auto;
+
+animation:spin 1s linear infinite;
+
+}
+
+.ai-loading p{
+
+margin-top:18px;
+
+font-size:16px;
+
+color:#64748b;
+
+}
+
+/* ===========================================
+   Scroll
+=========================================== */
+
+.ai-modal{
+
+max-height:85vh;
+
+overflow-y:auto;
+
+}
+
+.ai-modal::-webkit-scrollbar{
+
+width:6px;
+
+}
+
+.ai-modal::-webkit-scrollbar-thumb{
+
+background:#cbd5e1;
+
+border-radius:20px;
+
+}
+
+/* ===========================================
+   Animations
+=========================================== */
+
+@keyframes spin{
+
+100%{
+
+transform:rotate(360deg);
+
+}
+
+}
+
+@keyframes slideUp{
+
+from{
+
+transform:translateY(40px);
+
+opacity:0;
+
+}
+
+to{
+
+transform:translateY(0);
+
+opacity:1;
+
+}
+
+}
+
+@keyframes fadeIn{
+
+from{
+
+opacity:0;
+
+}
+
+to{
+
+opacity:1;
+
+}
+
+}
+
+/* ===========================================
+   Mobile
+=========================================== */
+
+@media(max-width:768px){
+
+.ai-floating-btn{
+
+width:58px;
+
+height:58px;
+
+font-size:26px;
+
+right:20px;
+
+bottom:20px;
+
+}
+
+.ai-modal{
+
+padding:22px;
+
+border-radius:18px;
+
+}
+
+.ai-header h2{
+
+font-size:22px;
+
+}
+
+.summary-card{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:8px;
+
+}
+
+.summary-card strong{
+
+font-size:20px;
+
+}
+
+.recommendation{
+
+padding:18px;
+
+}
+
+}
+/* ===========================================
+   New AI Summary
+=========================================== */
+
+.ai-greeting{
+
+margin-bottom:25px;
+
+}
+
+.ai-greeting h3{
+
+margin:0;
+
+font-size:28px;
+
+font-weight:700;
+
+color:#111827;
+
+}
+
+.ai-greeting p{
+
+margin-top:8px;
+
+font-size:15px;
+
+color:#64748b;
+
+line-height:1.6;
+
+}
+
+/* ===========================================
+   Today's Summary
+=========================================== */
+
+.today-summary{
+
+margin-top:15px;
+
+background:#f8fafc;
+
+border:1px solid #e2e8f0;
+
+border-radius:16px;
+
+padding:18px;
+
+}
+
+.today-summary h4{
+
+margin-bottom:18px;
+
+font-size:20px;
+
+color:#075E54;
+
+}
+
+/* ===========================================
+   Summary Rows
+=========================================== */
+
+.summary-row{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:14px 0;
+
+border-bottom:1px solid #e2e8f0;
+
+}
+
+.summary-row:last-child{
+
+border-bottom:none;
+
+}
+
+.summary-row span{
+
+font-size:16px;
+
+font-weight:500;
+
+color:#475569;
+
+}
+
+.summary-row strong{
+
+font-size:18px;
+
+font-weight:700;
+
+color:#111827;
+
+}
+
+/* ===========================================
+   Recommendation
+=========================================== */
+
+.recommendation{
+
+margin-top:25px;
+
+padding:20px;
+
+background:#ecfdf5;
+
+border-left:5px solid #10b981;
+
+border-radius:16px;
+
+}
+
+.recommendation h4{
+
+margin-bottom:12px;
+
+font-size:20px;
+
+color:#065f46;
+
+}
+
+.recommendation ul{
+
+margin:0;
+
+padding-left:22px;
+
+}
+
+.recommendation li{
+
+margin-bottom:10px;
+
+font-size:15px;
+
+line-height:1.6;
+
+color:#334155;
+
+}
+
+/* ===========================================
+   Business Health
+=========================================== */
+
+.business-health{
+
+margin-top:22px;
+
+padding:18px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+background:#f8fafc;
+
+border-radius:16px;
+
+border:1px solid #e2e8f0;
+
+}
+
+.business-health span{
+
+font-size:17px;
+
+font-weight:600;
+
+color:#475569;
+
+}
+
+.business-health strong{
+
+font-size:20px;
+
+font-weight:700;
+
+}

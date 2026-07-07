@@ -1,0 +1,136 @@
+.history{
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 10px 20px rgba(0,0,0,.08);
+}
+
+.history h2{
+    color:#075E54;
+    margin-bottom:20px;
+}
+
+.history-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    margin-bottom:10px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    background:#f8fafc;
+
+}
+
+.history-card:hover{
+
+    background:#dcf8c6;
+
+}
+
+.paid{
+
+    color:green;
+
+    font-weight:bold;
+
+}
+
+.pending{
+
+    color:orange;
+
+    font-weight:bold;
+
+}
+/* ==========================
+   History Header
+========================== */
+
+.history-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:22px;
+
+padding-bottom:18px;
+
+border-bottom:1px solid #edf2f7;
+
+}
+
+.history-title h2{
+
+margin:0;
+
+font-size:30px;
+
+font-weight:700;
+
+color:#111827;
+
+}
+
+.history-title p{
+
+margin-top:6px;
+
+font-size:14px;
+
+color:#64748b;
+
+}
+
+.history-count{
+
+width:90px;
+
+height:70px;
+
+background:#f8fafc;
+
+border:1px solid #e2e8f0;
+
+border-radius:16px;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+}
+
+.history-count span{
+
+font-size:12px;
+
+color:#64748b;
+
+}
+
+.history-count h3{
+
+margin-top:4px;
+
+font-size:24px;
+
+color:#075E54;
+
+}
