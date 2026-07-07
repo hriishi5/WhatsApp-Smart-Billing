@@ -13,11 +13,12 @@ function BusinessSettings({ onClose, onSave }) {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/settings")
+    fetch(`${import.meta.env.VITE_API_URL}/settings`)
       .then((res) => res.json())
       .then((data) => {
         setSettings(data);
-      });
+      })
+      .catch((err) => console.log(err));
   }, []);
 
   const handleChange = (e) => {
@@ -28,7 +29,7 @@ function BusinessSettings({ onClose, onSave }) {
   };
 
   const handleSave = async () => {
-    await fetch("http://localhost:5000/settings", {
+    await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
