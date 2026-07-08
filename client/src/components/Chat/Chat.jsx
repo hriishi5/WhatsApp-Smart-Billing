@@ -47,6 +47,7 @@ function Chat({
           placeholder={`Example:
 
 Rahul
+7899458206
 2 Paneer Roll
 1 Coke
 250`}
