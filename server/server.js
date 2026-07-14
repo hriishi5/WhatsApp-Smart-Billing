@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
@@ -5,6 +6,35 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const app = express();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+function authenticateToken(req, res, next) {
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Token missing",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+
+    if (err) {
+      return res.status(403).json({
+        message: "Invalid token",
+      });
+    }
+
+    req.user = user;
+
+    next();
+
+  });
+
+}
 
 app.use(
   cors({
@@ -90,6 +120,14 @@ db.run(
   }
 );
 
+db.run(
+  `ALTER TABLE invoices ADD COLUMN userId INTEGER`,
+  (err) => {
+    if (err && !err.message.includes("duplicate column")) {
+      console.log(err.message);
+    }
+  }
+);
 // Business Settings Table
 db.run(`
 CREATE TABLE IF NOT EXISTS settings (
@@ -212,15 +250,38 @@ app.post("/login", (req, res) => {
         });
       }
 
-      res.json({
-  success: true,
-  message: "Login Successful",
-  user: {
+      const token = jwt.sign(
+  {
     id: user.id,
-    name: user.name,
     email: user.email,
   },
-});
+  JWT_SECRET,
+  {
+    expiresIn: "7d",
+  }
+);
+
+db.get(
+  "SELECT * FROM businesses WHERE userId = ?",
+  [user.id],
+  (err, business) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    res.json({
+      success: true,
+      message: "Login Successful",
+      token,
+      hasBusiness: !!business,
+      user: {
+  id: user.id,
+  name: user.name,
+  email: user.email,
+},
+    });
+  }
+);
 
     }
   );
@@ -229,10 +290,100 @@ app.post("/login", (req, res) => {
 
 // ---------------- SAVE BUSINESS ----------------
 
-app.post("/business", (req, res) => {
+app.post("/business", authenticateToken, (req, res) => {
 
   const {
-    userId,
+    businessName,
+    ownerName,
+    phone,
+    upiId,
+    email,
+    address,
+} = req.body;
+
+const userId = req.user.id;
+
+  db.get(
+  "SELECT * FROM businesses WHERE userId = ?",
+  [userId],
+  (err, business) => {
+
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    if (business) {
+      return res.json({
+        success: true,
+        message: "Business already exists",
+      });
+    }
+
+    db.run(
+      `INSERT INTO businesses
+      (
+        userId,
+        businessName,
+        ownerName,
+        phone,
+        upiId,
+        email,
+        address
+      )
+      VALUES(?,?,?,?,?,?,?)`,
+      [
+        userId,
+        businessName,
+        ownerName,
+        phone,
+        upiId,
+        email,
+        address,
+      ],
+      function (err) {
+
+        if (err) {
+          return res.status(500).json(err);
+        }
+
+        res.json({
+          success: true,
+          message: "Business saved successfully",
+        });
+
+      }
+    );
+
+  }
+);
+
+});
+
+// ---------------- GET BUSINESS ----------------
+
+app.get("/business", authenticateToken, (req, res) => {
+
+  db.get(
+    "SELECT * FROM businesses WHERE userId = ?",
+    [req.user.id],
+    (err, row) => {
+
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      res.json(row);
+
+    }
+  );
+
+});
+
+// ---------------- UPDATE BUSINESS ----------------
+
+app.put("/business", authenticateToken, (req,res)=>{
+
+  const {
     businessName,
     ownerName,
     phone,
@@ -242,25 +393,23 @@ app.post("/business", (req, res) => {
   } = req.body;
 
   db.run(
-    `INSERT INTO businesses
-    (
-      userId,
-      businessName,
-      ownerName,
-      phone,
-      upiId,
-      email,
-      address
-    )
-    VALUES(?,?,?,?,?,?,?)`,
+    `UPDATE businesses
+     SET
+       businessName = ?,
+       ownerName = ?,
+       phone = ?,
+       upiId = ?,
+       email = ?,
+       address = ?
+     WHERE userId = ?`,
     [
-      userId,
       businessName,
       ownerName,
       phone,
       upiId,
       email,
       address,
+      req.user.id,
     ],
     function (err) {
 
@@ -270,7 +419,6 @@ app.post("/business", (req, res) => {
 
       res.json({
         success: true,
-        message: "Business saved successfully",
       });
 
     }
@@ -278,14 +426,13 @@ app.post("/business", (req, res) => {
 
 });
 
-
 // ---------------- GENERATE INVOICE ID ----------------
 
-function generateInvoiceId(callback) {
+function generateInvoiceId(userId, callback){
 
     db.get(
-        "SELECT businessName FROM settings WHERE id=1",
-        [],
+        "SELECT businessName FROM businesses WHERE userId = ?",
+        [userId],
         (err, setting) => {
 
             if (err) {
@@ -315,12 +462,13 @@ function generateInvoiceId(callback) {
             db.get(
 
                 `SELECT invoiceId
-                 FROM invoices
-                 WHERE invoiceId LIKE ?
-                 ORDER BY id DESC
-                 LIMIT 1`,
+FROM invoices
+WHERE userId = ?
+AND invoiceId LIKE ?
+ORDER BY id DESC
+LIMIT 1`,
 
-                [`${prefix}-%`],
+                [userId, `${prefix}-%`],
 
                 (err, row) => {
 
@@ -358,27 +506,29 @@ function generateInvoiceId(callback) {
 
 // ---------------- SAVE INVOICE ----------------
 
-app.post("/invoice", (req, res) => {
+app.post("/invoice", authenticateToken, (req, res) => {
 
    const {
 
-    customer,
+  customer,
 
-    phone,
+  phone,
 
-    items,
+  items,
 
-    amount,
+  amount,
 
-    status,
+  status,
 
-    createdAt
+  createdAt
 
 } = req.body;
 
+const userId = req.user.id;
+
     console.log("Saving Invoice:", req.body);
 
-    generateInvoiceId((err, invoiceId) => {
+    generateInvoiceId(userId, (err, invoiceId) => {
 
     if (err) {
 
@@ -391,32 +541,30 @@ app.post("/invoice", (req, res) => {
     db.run(
 
         `INSERT INTO invoices
-        (
-            invoiceId,
-            customer,
-            phone,
-            items,
-            amount,
-            status,
-            createdAt
-        )
-        VALUES(?,?,?,?,?,?,?)`,
+(
+    invoiceId,
+    userId,
+    customer,
+    phone,
+    items,
+    amount,
+    status,
+    createdAt
+)
+VALUES(?,?,?,?,?,?,?,?)`,
 
         [
 
-            invoiceId,
+            
+    invoiceId,
+    userId,
+    customer,
+    phone,
+    JSON.stringify(items),
+    amount,
+    status,
+    createdAt
 
-            customer,
-
-            phone,
-
-            JSON.stringify(items),
-
-            amount,
-
-            status,
-
-            createdAt
 
         ],
 
@@ -450,24 +598,24 @@ app.post("/invoice", (req, res) => {
 
 // ---------------- GET ALL INVOICES ----------------
 
-app.get("/invoices", (req, res) => {
+app.get("/invoices", authenticateToken, (req, res) => {
+
+    const userId = req.user.id;
 
     db.all(
 
-        "SELECT * FROM invoices ORDER BY id DESC",
+        "SELECT * FROM invoices WHERE userId = ? ORDER BY id DESC",
 
-        [],
+        [userId],
 
         (err, rows) => {
 
-            if(err){
+            if (err) {
                 return res.status(500).json(err);
             }
 
-            rows.forEach((row)=>{
-
+            rows.forEach((row) => {
                 row.items = JSON.parse(row.items);
-
             });
 
             res.json(rows);
@@ -480,15 +628,16 @@ app.get("/invoices", (req, res) => {
 
 // ---------------- MARK AS PAID ----------------
 
-app.put("/invoice/:invoiceId", (req, res) => {
+app.put("/invoice/:invoiceId",authenticateToken, (req, res) => {
 
   const { status } = req.body;
 
   db.run(
     `UPDATE invoices
-     SET status=?
-     WHERE invoiceId=?`,
-    [status, req.params.invoiceId],
+SET status=?
+WHERE invoiceId=?
+AND userId=?`,
+    [status, req.params.invoiceId, req.user.id],
     function(err){
 
       if(err){
@@ -504,100 +653,15 @@ app.put("/invoice/:invoiceId", (req, res) => {
 
 // ---------------- DELETE INVOICE ----------------
 
-app.delete("/invoice/:invoiceId", (req, res) => {
+app.delete("/invoice/:invoiceId",authenticateToken, (req, res) => {
 
     const invoiceId = req.params.invoiceId;
 
     db.run(
 
-        "DELETE FROM invoices WHERE invoiceId=?",
+        "DELETE FROM invoices WHERE invoiceId=? AND userId=?",
 
-        [invoiceId],
-
-        function(err){
-
-            if(err){
-                return res.status(500).json(err);
-            }
-
-            res.json({
-                success:true
-            });
-
-        }
-
-    );
-
-});
-
-// ---------------- GET SETTINGS ----------------
-
-app.get("/settings", (req, res) => {
-
-    db.get(
-
-        "SELECT * FROM settings WHERE id=1",
-
-        [],
-
-        (err,row)=>{
-
-            if(err){
-                return res.status(500).json(err);
-            }
-
-            res.json(row);
-
-        }
-
-    );
-
-});
-
-// ---------------- UPDATE SETTINGS ----------------
-
-app.put("/settings", (req, res) => {
-
-    const {
-
-        businessName,
-        ownerName,
-        phone,
-        upiNumber,
-        upiId,
-        email,
-        address,
-        logo
-
-    } = req.body;
-
-    db.run(
-
-        `UPDATE settings SET
-
-        businessName=?,
-        ownerName=?,
-        phone=?,
-        upiNumber=?,
-        upiId=?,
-        email=?,
-        address=?,
-        logo=?
-
-        WHERE id=1`,
-
-        [
-
-            businessName,
-            ownerName,
-            phone,
-            upiNumber,
-            upiId,
-            email,
-            address,
-            logo
-
-        ],
+        [invoiceId, req.user.id],
 
         function(err){
 
@@ -614,6 +678,8 @@ app.put("/settings", (req, res) => {
     );
 
 });
+
+
 
 // ---------------- START SERVER ----------------
 

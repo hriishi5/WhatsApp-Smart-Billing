@@ -43,20 +43,27 @@ margin-bottom:25px;
 
 }
 
-.brand h1{
-
-color:#075E54;
-
-font-size:28px;
-
+.brand{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
 
-.brand p{
+.brand-title{
+    font-size:32px;
+    font-weight:800;
+    color:#0f766e;
+    letter-spacing:-1px;
+}
 
-color:#64748b;
+.brand-subtitle{
+    font-size:15px;
+    color:#6b7280;
+}
 
-margin-top:5px;
-
+.brand-subtitle strong{
+    color:#111827;
+    font-weight:700;
 }
 
 .header-stats{
@@ -194,20 +201,45 @@ border:none;
 
 border-radius:10px;
 
-background:#075E54;
+background:transparent;
 
-color:white;
+color:#075E54;
 
 cursor:pointer;
 
 font-weight:600;
-
+font-size: 25px;
 transition:.25s;
 
 }
 
 .settings-btn:hover{
 
-background:#128C7E;
+background:#075E54;
+color: white;
 
+}
+
+.logout-btn{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  background:#ef4444;
+  color:white;
+
+  border:none;
+  border-radius:10px;
+
+  padding:12px 18px;
+
+  font-weight:600;
+  cursor:pointer;
+
+  transition:.25s;
+}
+
+.logout-btn:hover{
+  background:#dc2626;
+  
 }

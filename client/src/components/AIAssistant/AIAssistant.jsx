@@ -177,6 +177,7 @@ const totalOrdersForProduct =
         onClick={openAssistant}
       >
         🤖
+        
       </button>
 
       {open && (

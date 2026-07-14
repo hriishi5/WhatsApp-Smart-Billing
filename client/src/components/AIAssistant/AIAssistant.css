@@ -34,6 +34,33 @@
 
   box-shadow: 0 18px 35px rgba(7,94,84,.45);
 
+} 
+.tooltip{
+
+    position:absolute;
+
+    right:75px;
+
+    background:#222;
+
+    color:white;
+
+    padding:8px 14px;
+
+    border-radius:8px;
+
+    white-space:nowrap;
+
+    opacity:0;
+
+    transition:.3s;
+
+    font-size:14px;
+}
+.ai-wrapper:hover .tooltip{
+
+opacity:1;
+
 }
 
 /* ===========================================
@@ -80,7 +107,28 @@ padding:28px;
 
 box-shadow:0 25px 60px rgba(0,0,0,.25);
 
-animation:slideUp .35s ease;
+
+animation:popup .3s ease;
+
+}
+
+@keyframes popup{
+
+from{
+
+opacity:0;
+
+transform:scale(.92);
+
+}
+
+to{
+
+opacity:1;
+
+transform:scale(1);
+
+}
 
 }
 

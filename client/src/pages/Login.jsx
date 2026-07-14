@@ -41,9 +41,21 @@ const navigate = useNavigate();
     JSON.stringify(data.user)
   );
 
-  navigate("/business-setup");
+  localStorage.setItem(
+    "token",
+    data.token
+  );
 
+ 
+ if (data.hasBusiness) {
+  navigate("/dashboard");
 } else {
+  navigate("/business-setup");
+}
+
+
+
+}    else {
 
   alert(data.message);
 

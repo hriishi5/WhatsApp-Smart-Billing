@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./BusinessSettings.css";
 
 function BusinessSettings({
@@ -11,16 +12,21 @@ function BusinessSettings({
     ownerName: "",
     phone: "",
     upiNumber: "",
-    upiId: "",
+    upiId: "",  
     email: "",
     address: "",
   });
-
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   useEffect(() => {
 
   if (setupMode) return;
 
-  fetch(`${import.meta.env.VITE_API_URL}/settings`)
+  fetch(`${import.meta.env.VITE_API_URL}/business`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
     .then((res) => res.json())
     .then((data) => {
 
@@ -44,47 +50,55 @@ function BusinessSettings({
 
  if (setupMode) {
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  
 
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/business`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        ...settings,
-      }),
-    }
-  );
+  `${import.meta.env.VITE_API_URL}/business`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(settings),
+  }
+);
 
   const data = await response.json();
 
   if (data.success) {
 
-    alert("Business Profile Created!");
+  alert("Business Profile Created!");
 
-    console.log(data);
-
-  }
-
-  return;
+  navigate("/dashboard");
 
 }
 
-  await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
+return;
+
+}
+
+  const response = await fetch(
+  `${import.meta.env.VITE_API_URL}/business`,
+  {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(settings),
-  });
+  }
+);
+
+const data = await response.json();
+
+if (data.success) {
 
   onSave(settings);
 
   onClose();
+
+}
 
 };
 

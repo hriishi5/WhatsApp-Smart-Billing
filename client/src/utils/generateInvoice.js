@@ -30,7 +30,7 @@ export async function generateInvoice(invoice, settings) {
   doc.setTextColor(...white);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text(settings.businessName.toUpperCase(), PAGE_L, 16);
+  doc.text("ApnaKhata", PAGE_L, 16);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -316,13 +316,13 @@ invoice.items.forEach((item, idx) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...secondary);
-    doc.text("Payment Method : UPI", PAGE_L, y);
+    
 
     y += 6;
     doc.text(`UPI ID : ${settings.upiId}`, PAGE_L, y);
 
     y += 6;
-    doc.text(`Contact : +91 ${settings.phone}`, PAGE_L, y);
+    doc.text(`Mobile No : ${settings.phone}`, PAGE_L, y);
 
     // QR code, aligned to the top of the "Payment Details" block, on the right
     const qrSize = 34;
@@ -378,7 +378,7 @@ invoice.items.forEach((item, idx) => {
   doc.setFontSize(9);
   doc.text("Thank you for your business.", 105, 282, { align: "center" });
   doc.setFont("helvetica", "bold");
-  doc.text(`${settings.businessName.toUpperCase()} | WhatsApp Smart Billing`, 105, 288, {
+  doc.text(`${settings.businessName.toUpperCase()} | ApnaKhata`, 105, 288, {
     align: "center",
   });
 

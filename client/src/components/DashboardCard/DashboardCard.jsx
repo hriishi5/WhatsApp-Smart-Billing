@@ -1,4 +1,4 @@
-import "./Dashboard.css";
+import "./DashboardCard.css";
 import { useState } from "react";
 import PendingPaymentsModal from "../PendingPaymentsModal/PendingPaymentsModal";
 
@@ -210,7 +210,8 @@ const totalOrdersForProduct =
   {pendingInvoices.length === 0 ? (
 
     <div className="empty-state">
-      No pending payments.
+      <p>✅ You're all caught up! 
+      No pending payments.</p>
     </div>
 
   ) : (
