@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import "./Login.css";
 
 function Login() {
+
+const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -38,7 +41,7 @@ function Login() {
     JSON.stringify(data.user)
   );
 
-  alert("Login Successful!");
+  navigate("/business-setup");
 
 } else {
 
@@ -46,6 +49,7 @@ function Login() {
 
 }
 };
+
 
   return (
     <div className="login-page">
