@@ -15,13 +15,24 @@ function Login() {
     });
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    console.log(form);
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    }
+  );
 
-    // API will come here later
-  };
+  const data = await response.json();
+
+  console.log(data);
+};
 
   return (
     <div className="login-page">

@@ -187,6 +187,54 @@ app.post("/register", async (req, res) => {
   );
 
 });
+
+// ---------------- LOGIN ----------------
+
+app.post("/login", (req, res) => {
+
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Email and password are required",
+    });
+  }
+
+  db.get(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    async (err, user) => {
+
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (!user) {
+        return res.status(400).json({
+          message: "User not found",
+        });
+      }
+
+      const isMatch = await bcrypt.compare(
+        password,
+        user.password
+      );
+
+      if (!isMatch) {
+        return res.status(400).json({
+          message: "Invalid password",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Login Successful",
+      });
+
+    }
+  );
+
+});
 // ---------------- GENERATE INVOICE ID ----------------
 
 function generateInvoiceId(callback) {
