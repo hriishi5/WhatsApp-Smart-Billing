@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import "./BusinessSettings.css";
 
-function BusinessSettings({ onClose, onSave }) {
+function BusinessSettings({
+  onClose,
+  onSave,
+  setupMode = false,
+}) {
   const [settings, setSettings] = useState({
     businessName: "",
     ownerName: "",
@@ -13,13 +17,21 @@ function BusinessSettings({ onClose, onSave }) {
   });
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/settings`)
-      .then((res) => res.json())
-      .then((data) => {
+
+  if (setupMode) return;
+
+  fetch(`${import.meta.env.VITE_API_URL}/settings`)
+    .then((res) => res.json())
+    .then((data) => {
+
+      if (data) {
         setSettings(data);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+      }
+
+    })
+    .catch((err) => console.log(err));
+
+}, [setupMode]);
 
   const handleChange = (e) => {
     setSettings({
@@ -29,25 +41,61 @@ function BusinessSettings({ onClose, onSave }) {
   };
 
   const handleSave = async () => {
-    await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
-      method: "PUT",
+
+ if (setupMode) {
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/business`,
+    {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(settings),
-    });
+      body: JSON.stringify({
+        userId: user.id,
+        ...settings,
+      }),
+    }
+  );
 
-    onSave(settings);
+  const data = await response.json();
 
-    onClose();
-  };
+  if (data.success) {
+
+    alert("Business Profile Created!");
+
+    console.log(data);
+
+  }
+
+  return;
+
+}
+
+  await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(settings),
+  });
+
+  onSave(settings);
+
+  onClose();
+
+};
 
   return (
     <div className="settings-overlay">
 
       <div className="settings-box">
 
-        <h2>Business Settings</h2>
+       <h2>
+  {setupMode ? "Business Setup" : "Business Settings"}
+</h2>
 
         <input
           name="businessName"
@@ -95,18 +143,20 @@ function BusinessSettings({ onClose, onSave }) {
 
         <div className="settings-buttons">
 
-          <button
-            className="cancel-btn"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
+          {!setupMode && (
+  <button
+    className="cancel-btn"
+    onClick={onClose}
+  >
+    Cancel
+  </button>
+)}
 
           <button
             className="save-btn"
             onClick={handleSave}
           >
-            Save Changes
+            {setupMode ? "Continue" : "Save Changes"}
           </button>
 
         </div>

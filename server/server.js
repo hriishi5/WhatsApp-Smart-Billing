@@ -47,6 +47,29 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL
 )
 `);
+
+// Business Table
+db.run(`
+CREATE TABLE IF NOT EXISTS businesses (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    userId INTEGER NOT NULL,
+
+    businessName TEXT NOT NULL,
+
+    ownerName TEXT NOT NULL,
+
+    phone TEXT,
+
+    upiId TEXT,
+
+    email TEXT,
+
+    address TEXT
+
+)
+`);
 // Add phone column
 db.run(
   `ALTER TABLE invoices ADD COLUMN phone TEXT`,
@@ -92,43 +115,6 @@ CREATE TABLE IF NOT EXISTS settings (
 )
 `);
 
-// Default Business Settings
-db.run(`
-INSERT OR IGNORE INTO settings
-(
-id,
-businessName,
-ownerName,
-phone,
-upiNumber,
-upiId,
-email,
-address,
-logo
-)
-
-VALUES(
-
-1,
-
-'Home Kitchen',
-
-'Hrishi',
-
-'7899458203',
-
-'7899458203',
-
-'7899458203@ybl',
-
-'support@homekitchen.com',
-
-'Mangalore',
-
-''
-
-)
-`);
 
 // ---------------- HOME ----------------
 
@@ -240,6 +226,59 @@ app.post("/login", (req, res) => {
   );
 
 });
+
+// ---------------- SAVE BUSINESS ----------------
+
+app.post("/business", (req, res) => {
+
+  const {
+    userId,
+    businessName,
+    ownerName,
+    phone,
+    upiId,
+    email,
+    address,
+  } = req.body;
+
+  db.run(
+    `INSERT INTO businesses
+    (
+      userId,
+      businessName,
+      ownerName,
+      phone,
+      upiId,
+      email,
+      address
+    )
+    VALUES(?,?,?,?,?,?,?)`,
+    [
+      userId,
+      businessName,
+      ownerName,
+      phone,
+      upiId,
+      email,
+      address,
+    ],
+    function (err) {
+
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      res.json({
+        success: true,
+        message: "Business saved successfully",
+      });
+
+    }
+  );
+
+});
+
+
 // ---------------- GENERATE INVOICE ID ----------------
 
 function generateInvoiceId(callback) {
