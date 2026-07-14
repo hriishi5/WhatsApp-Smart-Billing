@@ -175,11 +175,14 @@ const user = JSON.parse(localStorage.getItem("user"));
 
   const handleDelete = async (invoiceId) => {
     await fetch(
-        `${import.meta.env.VITE_API_URL}/invoice/${invoiceId}`,
-        {
-          method: "DELETE",
-        }
-      );
+  `${import.meta.env.VITE_API_URL}/invoice/${invoiceId}`,
+  {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
     setMessages((prev) =>
       prev.filter((msg) => msg.invoiceId !== invoiceId)
