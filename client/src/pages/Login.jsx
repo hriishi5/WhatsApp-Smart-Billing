@@ -31,7 +31,20 @@ function Login() {
 
   const data = await response.json();
 
-  console.log(data);
+  if (data.success) {
+
+  localStorage.setItem(
+    "user",
+    JSON.stringify(data.user)
+  );
+
+  alert("Login Successful!");
+
+} else {
+
+  alert(data.message);
+
+}
 };
 
   return (
