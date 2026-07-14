@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
@@ -36,7 +38,15 @@ CREATE TABLE IF NOT EXISTS invoices (
     status TEXT
 )
 `);
-
+// Users Table
+db.run(`
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+`);
 // Add phone column
 db.run(
   `ALTER TABLE invoices ADD COLUMN phone TEXT`,
@@ -124,6 +134,58 @@ VALUES(
 
 app.get("/", (req, res) => {
     res.send("Backend Running 🚀");
+});
+
+// ---------------- REGISTER ----------------
+
+app.post("/register", async (req, res) => {
+
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      message: "All fields are required",
+    });
+  }
+
+  db.get(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    async (err, user) => {
+
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      if (user) {
+        return res.status(400).json({
+          message: "User already exists",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      db.run(
+        `INSERT INTO users(name, email, password)
+         VALUES(?,?,?)`,
+        [name, email, hashedPassword],
+        function (err) {
+
+          if (err) {
+            return res.status(500).json(err);
+          }
+
+          res.json({
+            success: true,
+            message: "User registered successfully",
+          });
+
+        }
+      );
+
+    }
+  );
+
 });
 // ---------------- GENERATE INVOICE ID ----------------
 
