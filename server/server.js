@@ -678,7 +678,23 @@ app.delete("/invoice/:invoiceId",authenticateToken, (req, res) => {
     );
 
 });
+app.get("/users", (req, res) => {
 
+  db.all(
+    "SELECT id, name, email FROM users",
+    [],
+    (err, rows) => {
+
+      if (err) {
+        return res.status(500).json(err);
+      }
+
+      res.json(rows);
+
+    }
+  );
+
+});
 
 
 // ---------------- START SERVER ----------------

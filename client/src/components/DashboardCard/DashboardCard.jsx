@@ -196,7 +196,13 @@ topThreeCounts.forEach((count, index) => {
 
     <span>Top Selling</span>
 
-    <h2>View List</h2>
+    <h2>
+
+        {topProducts.length === 0
+            ? "-"
+            : `${topProducts.length} Product${topProducts.length > 1 ? "s" : ""}`}
+
+    </h2>
 
     {topProducts.length > 0 && (
 
