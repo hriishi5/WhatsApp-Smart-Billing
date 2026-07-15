@@ -194,7 +194,7 @@ const totalOrdersForProduct =
 
             <div className="ai-header">
 
-              <h2>AI Sales Assistant</h2>
+              <h2>ApnaKhata AI</h2>
 
               <button
                 onClick={() => setOpen(false)}
@@ -203,6 +203,7 @@ const totalOrdersForProduct =
               </button>
 
             </div>
+            <div className="ai-body">
 
             {loading ? (
 
@@ -216,161 +217,201 @@ const totalOrdersForProduct =
 
             ) : (
 
-              <>
+           <>
+  {/* Greeting */}
 
   <div className="ai-greeting">
-
-    <h3>
-      {greeting},{" "}
-      {settings?.ownerName || "Owner"} 👋
-    </h3>
+    <h2>
+      {greeting}, {settings?.ownerName || "Owner"} 👋
+    </h2>
 
     <p>
-      Here's your business summary for today.
+      Your AI Business Advisor has analyzed today's business.
+    </p>
+  </div>
+
+  {/* ================= Daily Report ================= */}
+
+  <div className="report-card">
+
+    <div className="report-title">
+
+      📊 Daily Business Report
+
+    </div>
+
+    <p>
+
+      {invoices.length === 0
+        ? "No business activity has been recorded today. Create your first invoice to start receiving AI insights."
+        : `Today you completed ${
+            todaysOrders || totalOrders
+          } order${(todaysOrders || totalOrders) > 1 ? "s" : ""} and collected ₹${totalRevenue.toLocaleString(
+            "en-IN"
+          )}. ${
+            pendingAmount === 0
+              ? "Every invoice has been paid, keeping your cash flow healthy."
+              : `₹${pendingAmount.toLocaleString(
+                  "en-IN"
+                )} is still awaiting collection.`
+          } Overall, your business performed ${
+            health === "Excellent"
+              ? "very well"
+              : health === "Good"
+              ? "well"
+              : "below its potential"
+          } today.`}
+
     </p>
 
   </div>
 
-  <div className="today-summary">
 
-    <h4>📅 Today's Summary</h4>
 
-    <div className="summary-row">
+  {/* ================= Insights ================= */}
 
-      <span>💰 Revenue Collected</span>
+  <div className="report-card">
 
-      <strong>
-        ₹{totalRevenue.toLocaleString("en-IN")}
-      </strong>
+    <div className="report-title">
+
+      🔍 Business Insights
 
     </div>
 
-    <div className="summary-row">
+    <div className="insight-row">
 
-      <span>🛒 Orders Processed</span>
+      <div className="emoji">
 
-      <strong>
-        {todaysOrders || totalOrders}
-      </strong>
+        🏆
 
-    </div>
+      </div>
 
-    <div className="summary-row">
+      <div className="insight-content">
 
-     <span>📦 Most Ordered Product</span>
+        <strong>Today's Best Seller</strong>
 
-<div
-  style={{
-    textAlign: "right"
-  }}
->
+        <p>
 
-  <strong>{mostOrderedProduct}</strong>
+          {mostOrderedProduct === "No Orders"
+            ? "No sales recorded yet."
+            : `${mostOrderedProduct} received the highest customer demand today.`}
 
-  <br />
+        </p>
 
-  <small
-    style={{
-      color: "#64748b"
-    }}
-  >
-    {totalOrdersForProduct} Orders
-  </small>
-
-</div>
+      </div>
 
     </div>
 
-    <div className="summary-row">
 
-      <span>⚠ Pending Collection</span>
+    <div className="insight-row">
 
-      <strong>
-        ₹{pendingAmount.toLocaleString("en-IN")}
-      </strong>
+      <div className="emoji">
+
+        💰
+
+      </div>
+
+      <div className="insight-content">
+
+        <strong>Payment Status</strong>
+
+        <p>
+
+          {pendingAmount === 0
+            ? "Every invoice has been collected successfully."
+            : `${pendingInvoices.length} invoice(s) are still awaiting payment.`}
+
+        </p>
+
+      </div>
 
     </div>
 
-    <div className="summary-row">
 
-      <span>📈 Collection Rate</span>
+    <div className="insight-row">
 
-      <strong>
-        {collectionRate}%
-      </strong>
+      <div className="emoji">
+
+        ❤️
+
+      </div>
+
+      <div className="insight-content">
+
+        <strong>Business Health</strong>
+
+        <p>{health}</p>
+
+      </div>
 
     </div>
 
   </div>
 
-  <div className="recommendation">
 
-    <h4>💡 AI Recommendations</h4>
 
-    <ul>
+  {/* ================= Next Action ================= */}
 
-      {pendingInvoices.length > 0 && (
+  <div className="report-card">
 
-        <li>
+    <div className="report-title">
 
-          Send payment reminders to{" "}
-          {pendingInvoices.length} customer(s).
+      ⚡ Next Action
 
-        </li>
+    </div>
 
-      )}
+    {pendingInvoices.length === 0 ? (
 
-      <li>
+      <div className="success-box">
 
-  {mostOrderedProduct} is the most ordered product today, appearing in{" "}
-  <strong>{totalOrdersForProduct}</strong> order(s).
+        <strong>Nothing urgent today.</strong>
 
-</li>
+        <p>
 
-      <li>
+          Your collections are complete.
 
-        Collection rate is{" "}
-        <strong>{collectionRate}%</strong>.
+          Continue updating your WhatsApp Status tomorrow to keep customers engaged.
 
-      </li>
+        </p>
 
-      {pendingInvoices.length === 0 ? (
+      </div>
 
-        <li>
+    ) : (
 
-          Great work! No pending invoices.
+      pendingInvoices.map((invoice) => (
 
-        </li>
+        <div
+          key={invoice.invoiceId}
+          className="warning-box"
+        >
 
-      ) : (
+          <strong>
 
-        <li>
+            Follow up with {invoice.customer}
 
-          Follow up on pending invoices today.
+          </strong>
 
-        </li>
+          <p>
 
-      )}
+            Invoice <b>{invoice.invoiceId}</b>
 
-    </ul>
+            <br />
 
-  </div>
+            Pending Amount ₹{invoice.amount}
 
-  <div className="business-health">
+          </p>
 
-    <span>Business Health</span>
+        </div>
 
-    <strong style={{ color }}>
+      ))
 
-      {health}
-
-    </strong>
+    )}
 
   </div>
-
 </>
 
             )}
+            </div>
 
           </div>
 
