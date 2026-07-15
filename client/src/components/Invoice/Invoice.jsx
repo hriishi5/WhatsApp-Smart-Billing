@@ -88,7 +88,7 @@ function Invoice({
         <p>📱 Scan to Pay</p>
 
         <p className="upi-id">
-  {settings?.upiNumber || "+91 7899458203"}
+  +91 {settings?.phone}
 </p>
       </div>)}
 
