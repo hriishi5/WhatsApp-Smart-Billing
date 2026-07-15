@@ -378,32 +378,27 @@ const totalOrdersForProduct =
 
     ) : (
 
-      pendingInvoices.map((invoice) => (
+      <div className="warning-box">
 
-        <div
-          key={invoice.invoiceId}
-          className="warning-box"
-        >
+  <strong>
+    {pendingInvoices.length} customer
+    {pendingInvoices.length > 1 ? "s are" : " is"} awaiting payment.
+  </strong>
 
-          <strong>
+  <p>
 
-            Follow up with {invoice.customer}
+    Total Pending Collection:
+    <b> ₹{pendingAmount.toLocaleString("en-IN")}</b>
 
-          </strong>
+    <br /><br />
 
-          <p>
+    Sending payment reminders today is recommended
+    to improve cash flow and maintain a healthy
+    collection rate.
 
-            Invoice <b>{invoice.invoiceId}</b>
+  </p>
 
-            <br />
-
-            Pending Amount ₹{invoice.amount}
-
-          </p>
-
-        </div>
-
-      ))
+</div>
 
     )}
 
