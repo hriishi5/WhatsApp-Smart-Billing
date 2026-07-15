@@ -4,6 +4,7 @@ import PendingPaymentsModal from "../PendingPaymentsModal/PendingPaymentsModal";
 
 function Dashboard({ invoices, onSelectInvoice }) {
   // ---------------- Statistics ----------------
+  const [showTopProducts, setShowTopProducts] = useState(false);
 const [showPendingModal, setShowPendingModal] =
 useState(false);
   const totalRevenue = invoices
@@ -17,10 +18,27 @@ useState(false);
   const totalOrders = invoices.length;
 
   // ---------------- Top Item ----------------
-
-  // ---------------- Most Ordered Product ----------------
+// ---------------- Top Selling Products ----------------
 
 const productCount = {};
+
+const units = [
+  "kg",
+  "gm",
+  "g",
+  "l",
+  "ml",
+  "dozen",
+  "piece",
+  "pieces",
+  "pcs",
+  "packet",
+  "pack",
+  "box",
+  "boxes",
+  "bottle",
+  "bottles",
+];
 
 invoices.forEach((invoice) => {
 
@@ -32,60 +50,39 @@ invoices.forEach((invoice) => {
 
     let product = "";
 
-    // Example:
-    // 2kg Chicken Curry
-    if (/^\d+(\.\d+)?[a-zA-Z]+$/.test(words[0])) {
+    // Example: 2kg Chicken Curry
+    if (/^\d+(\.\d+)?[a-zA-Z]+$/i.test(words[0])) {
 
       product = words.slice(1).join(" ");
 
     }
 
-    // Example:
-    // 2 Dozen Banana
+    // Example: 2 Dozen Eggs
     else if (
       words.length > 2 &&
-      !isNaN(words[0])
+      !isNaN(words[0]) &&
+      units.includes(words[1].toLowerCase())
     ) {
 
-      const possibleUnit = words[1].toLowerCase();
-
-      const units = [
-        "kg",
-        "gm",
-        "g",
-        "l",
-        "ml",
-        "dozen",
-        "piece",
-        "pieces",
-        "pcs",
-        "packet",
-        "pack",
-        "box",
-        "boxes",
-        "bottle",
-        "bottles"
-      ];
-
-      if (units.includes(possibleUnit)) {
-
-        product = words.slice(2).join(" ");
-
-      } else {
-
-        product = words.slice(1).join(" ");
-
-      }
+      product = words.slice(2).join(" ");
 
     }
 
-    // Example:
-    // Coke
+    // Example: 2 Fries
+    else if (!isNaN(words[0])) {
+
+      product = words.slice(1).join(" ");
+
+    }
+
+    // Example: Coke
     else {
 
       product = item;
 
     }
+
+    product = product.trim();
 
     // Count only once per invoice
     if (!addedProducts.has(product)) {
@@ -99,16 +96,37 @@ invoices.forEach((invoice) => {
 
   });
 
+}); 
+
+const rankedProducts = Object.entries(productCount)
+  .sort((a, b) => b[1] - a[1]);
+
+// Highest 3 unique order counts
+const uniqueCounts = [
+  ...new Set(rankedProducts.map(([, count]) => count))
+];
+
+const topThreeCounts = uniqueCounts.slice(0, 3);
+
+// Include every tied product
+const topProducts = rankedProducts.filter(
+  ([, count]) => topThreeCounts.includes(count)
+);
+
+// Medal mapping
+const medalMap = {};
+
+topThreeCounts.forEach((count, index) => {
+
+  medalMap[count] =
+    index === 0
+      ? "🥇"
+      : index === 1
+      ? "🥈"
+      : "🥉";
+
 });
 
-const mostOrderedProduct =
-  Object.keys(productCount).length === 0
-    ? "-"
-    : Object.entries(productCount)
-        .sort((a, b) => b[1] - a[1])[0][0];
-
-const totalOrdersForProduct =
-  productCount[mostOrderedProduct] || 0;
 
   // ---------------- Pending ----------------
 
@@ -174,20 +192,24 @@ const totalOrdersForProduct =
 
         </div>
 
-        <div className="dashboard-card">
+       <div className="dashboard-card">
 
-          <span>Most Ordered</span>
+    <span>Top Selling</span>
 
-          <>
-  
+    <h2>View List</h2>
 
-<h2>{mostOrderedProduct}</h2>
+    {topProducts.length > 0 && (
 
+        <button
+            className="view-products-btn"
+            onClick={() => setShowTopProducts(true)}
+        >
+            View →
+        </button>
 
-</>
+    )}
 
-        </div>
-
+</div>
       </div>
       
 
@@ -238,6 +260,8 @@ const totalOrdersForProduct =
           }
 
         }
+
+        
 
         return (
 
@@ -294,6 +318,69 @@ const totalOrdersForProduct =
   invoices={pendingInvoices}
   onSelectInvoice={onSelectInvoice}
 />
+
+{showTopProducts && (
+
+<div
+    className="modal-overlay"
+    onClick={() => setShowTopProducts(false)}
+>
+
+<div
+    className="top-products-modal"
+    onClick={(e) => e.stopPropagation()}
+>
+
+<h2>🏆 Top Selling Products</h2>
+
+<div className="top-products-list">
+
+{topProducts.map(([product, count]) => {
+return(
+
+<div
+    key={product}
+    className="top-product-row"
+>
+
+<div>
+
+<strong>
+
+{medalMap[count]} {product}
+
+</strong>
+
+</div>
+
+<span>
+
+{count} Order{count>1?"s":""}
+
+</span>
+
+</div>
+
+);
+
+})}
+
+</div>
+
+<button
+className="close-modal-btn"
+onClick={()=>setShowTopProducts(false)}
+>
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+)}
 
     </div>
   );
