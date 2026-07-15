@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
-import { NotoSansRegularBase64, NotoSansBoldBase64 } from "./notosansfonts";
+import { NotoSansRegularBase64, NotoSansBoldBase64 } from "./notoSansFonts";
 
 const FONT = "NotoSans";
 
