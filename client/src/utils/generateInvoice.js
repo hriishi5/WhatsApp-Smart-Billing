@@ -1,8 +1,31 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
+import { NotoSansRegularBase64, NotoSansBoldBase64 } from "./notoSansFonts";
+
+const FONT = "NotoSans";
+
+/**
+ * Registers the embedded NotoSans font (subset to ASCII + ₹ + bullet + en-dash,
+ * ~9KB each) so the real ₹ glyph renders instead of jsPDF's core "helvetica"
+ * font, which has no ₹ glyph and silently substitutes garbage in its place.
+ */
+function registerFonts(doc) {
+  doc.addFileToVFS("NotoSans-Regular.ttf", NotoSansRegularBase64);
+  doc.addFont("NotoSans-Regular.ttf", FONT, "normal");
+  doc.addFileToVFS("NotoSans-Bold.ttf", NotoSansBoldBase64);
+  doc.addFont("NotoSans-Bold.ttf", FONT, "bold");
+}
 
 export async function generateInvoice(invoice, settings) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  registerFonts(doc);
+  doc.setFont(FONT, "normal");
+
+  // Product/app branding (ApnaKhata) is distinct from the merchant's own
+  // business name (settings.businessName, e.g. "Ghar Pizzeria"). Header shows
+  // the product brand; the merchant's details get their own card below it.
+  // Falls back to "ApnaKhata" if settings.brandName isn't wired up yet.
+  const BRAND_NAME = settings.brandName || "ApnaKhata";
 
   // ---------- Palette ----------
   const primary = [7, 94, 84];
@@ -15,28 +38,59 @@ export async function generateInvoice(invoice, settings) {
   const PAGE_L = 20;
   const PAGE_R = 190;
   const PAGE_W = PAGE_R - PAGE_L; // 170
+  const PAGE_TOP = 20;
+  const PAGE_BOTTOM = 265; // reserve space below this for the footer
 
-  // jsPDF's core "helvetica" font has no ₹ glyph — it silently falls back
-  // to an unrelated character (which is why you saw "'70" instead of "₹70").
-  // Safest fix without embedding a custom font is to use "Rs."
-  const currency = (n) => `Rs. ${n}`;
+  const currency = (n) => `₹${n}`;
 
   /* ==========================================
-     HEADER
+     PAGE-BREAK HELPERS
+  ========================================== */
+  function addContinuationPage() {
+    doc.addPage();
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, 210, 16, "F");
+    doc.setTextColor(...white);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(11);
+    doc.text(`${BRAND_NAME.toUpperCase()} — Invoice ${invoice.invoiceId} (contd.)`, PAGE_L, 10);
+    return PAGE_TOP + 6;
+  }
+
+  function ensureSpace(currentY, neededHeight) {
+    if (currentY + neededHeight > PAGE_BOTTOM) {
+      return addContinuationPage();
+    }
+    return currentY;
+  }
+
+  function drawFooter() {
+    doc.setTextColor(...dark);
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(9);
+    doc.text("Thank you for your business.", 105, 282, { align: "center" });
+    doc.setFont(FONT, "bold");
+    doc.text(`${settings.businessName.toUpperCase()} | ${BRAND_NAME}`, 105, 288, {
+      align: "center",
+    });
+  }
+
+  /* ==========================================
+     HEADER — product branding (ApnaKhata), not the merchant's name
   ========================================== */
   doc.setFillColor(...primary);
   doc.rect(0, 0, 210, 36, "F");
 
   doc.setTextColor(...white);
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(22);
-  doc.text("ApnaKhata", PAGE_L, 16);
+  doc.text(BRAND_NAME, PAGE_L, 16);
 
-  doc.setFont("helvetica", "normal");
+  doc.setFont(FONT, "normal");
   doc.setFontSize(10);
   doc.text("WhatsApp Smart Billing System", PAGE_L, 23);
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(26);
   doc.text("INVOICE", PAGE_R, 18, { align: "right" });
 
@@ -45,114 +99,151 @@ export async function generateInvoice(invoice, settings) {
   doc.line(PAGE_L, 29, PAGE_R, 29);
 
   /* ==========================================
-     BUSINESS DETAILS (left) + INFO CARD (right)
+     TWO MATCHING CARDS: merchant's business details (left)
+     + "Business Information" trust card (right)
   ========================================== */
-  const infoBoxX = 128;
-  const infoBoxY = 44;
-  const infoBoxW = PAGE_R - infoBoxX; // 62
-  const infoBoxH = 26;
+  const cardY = 44;
+  const cardH = 32;
+  const cardGap = 6;
+  const rightBoxW = 62;
+  const rightBoxX = PAGE_R - rightBoxW;
+  const leftBoxX = PAGE_L;
+  const leftBoxW = rightBoxX - leftBoxX - cardGap;
 
+  // Left card — the merchant's own business identity + contact details
   doc.setFillColor(...light);
   doc.setDrawColor(...border);
-  doc.roundedRect(infoBoxX, infoBoxY, infoBoxW, infoBoxH, 2, 2, "FD");
+  doc.roundedRect(leftBoxX, cardY, leftBoxW, cardH, 2, 2, "FD");
 
   doc.setTextColor(...dark);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("Business Information", infoBoxX + 5, infoBoxY + 8);
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(11);
+  doc.text(settings.businessName, leftBoxX + 5, cardY + 8);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Digitally Generated", infoBoxX + 5, infoBoxY + 15);
-  doc.text("No Signature Required", infoBoxX + 5, infoBoxY + 21);
+  doc.setDrawColor(...border);
+  doc.setLineWidth(0.2);
+  doc.line(leftBoxX + 5, cardY + 11, leftBoxX + leftBoxW - 5, cardY + 11);
 
-  // Left column text — same vertical rhythm as the info card, one line each
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(8.5);
+  const rowLabelX = leftBoxX + 5;
+  const rowValueX = leftBoxX + 22;
+  let rowY = cardY + 17;
+
   doc.setTextColor(...secondary);
-  doc.setFont("helvetica", "normal");
+  doc.text("Address", rowLabelX, rowY);
+  doc.setTextColor(...dark);
+  doc.text(settings.address, rowValueX, rowY);
+
+  rowY += 6;
+  doc.setTextColor(...secondary);
+  doc.text("Phone", rowLabelX, rowY);
+  doc.setTextColor(...dark);
+  doc.text(`+91 ${settings.phone}`, rowValueX, rowY);
+
+  rowY += 6;
+  doc.setTextColor(...secondary);
+  doc.text("Email", rowLabelX, rowY);
+  doc.setTextColor(...dark);
+  doc.text(settings.email, rowValueX, rowY);
+
+  // Right card — trust/authenticity note, same height as the left card now
+  doc.setFillColor(...light);
+  doc.setDrawColor(...border);
+  doc.roundedRect(rightBoxX, cardY, rightBoxW, cardH, 2, 2, "FD");
+
+  doc.setTextColor(...dark);
+  doc.setFont(FONT, "bold");
   doc.setFontSize(10);
-  doc.text(settings.address, PAGE_L, 48);
-  doc.text(`Phone : +91 ${settings.phone}`, PAGE_L, 55);
-  doc.text(settings.email, PAGE_L, 62);
+  doc.text("Business Information", rightBoxX + 5, cardY + 8);
+
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...secondary);
+  doc.text("Digitally Generated", rightBoxX + 5, cardY + 16);
+  doc.text("No Signature Required", rightBoxX + 5, cardY + 23);
+  doc.text(`Powered by ${BRAND_NAME}`, rightBoxX + 5, cardY + 29);
 
   /* ==========================================
      DIVIDER
   ========================================== */
-  const dividerY = infoBoxY + infoBoxH + 6; // 76
+  const dividerY = cardY + cardH + 6;
   doc.setDrawColor(...border);
   doc.line(PAGE_L, dividerY, PAGE_R, dividerY);
 
   /* ==========================================
-     INVOICE META (invoice no / date / customer / phone / created)
+     INVOICE META (invoice no / date / customer / phone)
   ========================================== */
   let metaY = dividerY + 8;
   const lineGap = 7;
 
   doc.setTextColor(...dark);
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(10);
   doc.text(`Invoice No : ${invoice.invoiceId}`, PAGE_L, metaY);
-  
 
   metaY += lineGap;
-  doc.setFont("helvetica", "normal");
+  doc.setFont(FONT, "normal");
+  doc.text(`Date : ${new Date(invoice.createdAt).toLocaleDateString()}`, PAGE_L, metaY);
+
+  metaY += lineGap;
   doc.text(`Customer : ${invoice.customer}`, PAGE_L, metaY);
 
   metaY += lineGap;
   doc.text(`Phone : +91 ${invoice.phone}`, PAGE_L, metaY);
 
-  metaY += lineGap;
-  doc.text(
-    `Date : ${new Date(invoice.createdAt).toLocaleDateString()}`,
-    PAGE_L,
-    metaY
-  );
-
-  // Status badge — vertically centered against the full meta block (all 4 lines),
-  // right-aligned. Previously it was pinned level with the top line only, which
-  // made it look like it was floating above the block instead of belonging to it.
+  // Status badge — vertically centered against the full meta block, right-aligned
   const statusColor = invoice.status === "Paid" ? [22, 163, 74] : [234, 88, 12];
   const badgeW = 32;
   const badgeH = 10;
   const badgeX = PAGE_R - badgeW;
-  const metaBlockTop = dividerY + 8 - 3.5; // approx cap-height above first baseline
-  const metaBlockBottom = metaY + 2; // approx descender below last baseline
+  const metaBlockTop = dividerY + 8 - 3.5;
+  const metaBlockBottom = metaY + 2;
   const badgeY = (metaBlockTop + metaBlockBottom) / 2 - badgeH / 2;
   doc.setFillColor(...statusColor);
   doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 2, 2, "F");
   doc.setTextColor(...white);
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(9);
   doc.text(invoice.status.toUpperCase(), badgeX + badgeW / 2, badgeY + 6.5, {
     align: "center",
   });
 
   /* ==========================================
-     ITEMS TABLE
+     ITEMS TABLE (with automatic page breaks)
   ========================================== */
   let y = metaY + 14;
 
-  const rowH = 10;
-  doc.setFillColor(...primary);
-  doc.rect(PAGE_L, y, PAGE_W, rowH, "F");
-  doc.setTextColor(...white);
-  doc.setFont("helvetica", "bold");
+  function drawTableHeader(atY) {
+    const rowH = 10;
+    doc.setFillColor(...primary);
+    doc.rect(PAGE_L, atY, PAGE_W, rowH, "F");
+    doc.setTextColor(...white);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(10);
+    doc.text("Qty", PAGE_L + 6, atY + 6.8);
+    doc.text("Description", PAGE_L + 30, atY + 6.8);
+    return atY + rowH;
+  }
+
+  y = drawTableHeader(y);
+
+  doc.setFont(FONT, "normal");
   doc.setFontSize(10);
-  doc.text("Quantity", PAGE_L + 6, y + 6.8);
-doc.text("Description", PAGE_L + 42, y + 6.8);
 
-  y += rowH;
+  const itemRowH = 9;
+  invoice.items.forEach((item, idx) => {
+    if (y + itemRowH > PAGE_BOTTOM) {
+      y = addContinuationPage();
+      y = drawTableHeader(y);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(10);
+    }
 
-  doc.setTextColor(...dark);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-
-  /*invoice.items.forEach((item, idx) => {
     const parts = item.trim().split(/\s+/);
     const qty = parts.shift();
     const name = parts.join(" ");
 
-    const itemRowH = 9;
-    // zebra striping for readability
     if (idx % 2 === 1) {
       doc.setFillColor(...light);
       doc.rect(PAGE_L, y, PAGE_W, itemRowH, "F");
@@ -161,87 +252,8 @@ doc.text("Description", PAGE_L + 42, y + 6.8);
     doc.text(String(qty), PAGE_L + 6, y + 6.2);
     doc.text(name, PAGE_L + 30, y + 6.2);
     y += itemRowH;
-  });*/
-  const units = [
-  "kg",
-  "gm",
-  "g",
-  "l",
-  "ml",
-  "dozen",
-  "piece",
-  "pieces",
-  "pcs",
-  "packet",
-  "pack",
-  "box",
-  "boxes",
-  "bottle",
-  "bottles"
-];
+  });
 
-invoice.items.forEach((item, idx) => {
-
-  const words = item.trim().split(/\s+/);
-
-  let qty = "";
-  let description = "";
-
-  // Example: 2kg Chicken Curry
-  if (/^\d+(\.\d+)?[a-zA-Z]+$/i.test(words[0])) {
-
-    qty = words[0];
-    description = words.slice(1).join(" ");
-
-  }
-
-  // Example: 2 Dozen Banana
-  else if (
-    words.length > 2 &&
-    !isNaN(words[0]) &&
-    units.includes(words[1].toLowerCase())
-  ) {
-
-    qty = `${words[0]} ${words[1]}`;
-    description = words.slice(2).join(" ");
-
-  }
-
-  // Example: 2 Coke
-  else if (!isNaN(words[0])) {
-
-    qty = words[0];
-    description = words.slice(1).join(" ");
-
-  }
-
-  // Example: Coke
-  else {
-
-    qty = "1";
-    description = item;
-
-  }
-
-  const itemRowH = 9;
-
-  if (idx % 2 === 1) {
-
-    doc.setFillColor(...light);
-
-    doc.rect(PAGE_L, y, PAGE_W, itemRowH, "F");
-
-  }
-
-  doc.setTextColor(...dark);
-
-  doc.text(qty, PAGE_L + 6, y + 6.2);
-
-  doc.text(description, PAGE_L + 42, y + 6.2);
-
-  y += itemRowH;
-
-});
   doc.setDrawColor(...border);
   doc.line(PAGE_L, y, PAGE_R, y);
   y += 10;
@@ -249,12 +261,14 @@ invoice.items.forEach((item, idx) => {
   /* ==========================================
      GRAND TOTAL
   ========================================== */
+  y = ensureSpace(y, 14 + 14);
+
   const totalBoxW = 80;
   const totalBoxH = 14;
   const totalBoxX = PAGE_R - totalBoxW;
   doc.setFillColor(237, 242, 247);
   doc.roundedRect(totalBoxX, y, totalBoxW, totalBoxH, 2, 2, "F");
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(11);
   doc.setTextColor(...dark);
   doc.text(
@@ -269,17 +283,18 @@ invoice.items.forEach((item, idx) => {
   /* ==========================================
      PAYMENT SECTION
      - Pending: show UPI details + scannable QR code
-     - Paid: QR/UPI info is no longer relevant, so replace it with a clean
-       "Payment Received" confirmation instead
+     - Paid: replace with a clean "Payment Received" confirmation
   ========================================== */
+  const paymentSectionHeight = invoice.status === "Paid" ? 26 : 46;
+  y = ensureSpace(y, paymentSectionHeight);
+
   if (invoice.status === "Paid") {
     const confirmH = 26;
-    doc.setFillColor(240, 253, 244); // light green tint
+    doc.setFillColor(240, 253, 244);
     doc.setDrawColor(...statusColor);
     doc.setLineWidth(0.4);
     doc.roundedRect(PAGE_L, y, PAGE_W, confirmH, 2, 2, "FD");
 
-    // checkmark badge
     const markCX = PAGE_L + 14;
     const markCY = y + confirmH / 2;
     doc.setFillColor(...statusColor);
@@ -290,15 +305,15 @@ invoice.items.forEach((item, idx) => {
     doc.line(markCX - 0.5, markCY + 2, markCX + 2.6, markCY - 2.3);
 
     doc.setTextColor(...dark);
-    doc.setFont("helvetica", "bold");
+    doc.setFont(FONT, "bold");
     doc.setFontSize(12);
     doc.text("Payment Received", markCX + 12, y + 11);
 
-    doc.setFont("helvetica", "normal");
+    doc.setFont(FONT, "normal");
     doc.setFontSize(9);
     doc.setTextColor(...secondary);
     doc.text(
-      `This invoice has been paid. Amount : ${currency(invoice.amount)}`,
+      `This invoice has been paid in full via UPI. Amount : ${currency(invoice.amount)}`,
       markCX + 12,
       y + 18
     );
@@ -307,40 +322,47 @@ invoice.items.forEach((item, idx) => {
   } else {
     const paymentBlockTop = y;
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(FONT, "bold");
     doc.setFontSize(11);
     doc.setTextColor(...dark);
     doc.text("Payment Details", PAGE_L, y);
 
     y += 8;
-    doc.setFont("helvetica", "normal");
+    doc.setFont(FONT, "normal");
     doc.setFontSize(10);
     doc.setTextColor(...secondary);
-    
+    doc.text("Payment Method : UPI", PAGE_L, y);
 
     y += 6;
     doc.text(`UPI ID : ${settings.upiId}`, PAGE_L, y);
 
     y += 6;
-    doc.text(`Mobile No : ${settings.phone}`, PAGE_L, y);
+    doc.text(`Contact : +91 ${settings.phone}`, PAGE_L, y);
 
-    // QR code, aligned to the top of the "Payment Details" block, on the right
     const qrSize = 34;
     const qrX = PAGE_R - qrSize;
     const qrY = paymentBlockTop - 6;
 
-    const upi = `upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(
-      settings.businessName
-    )}&am=${invoice.amount}&cu=INR`;
-    const qr = await QRCode.toDataURL(upi);
-    doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...secondary);
-    doc.text("Scan to Pay", qrX + qrSize / 2, qrY + qrSize + 6, {
-      align: "center",
-    });
+    try {
+      const upi = `upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(
+        settings.businessName
+      )}&am=${invoice.amount}&cu=INR`;
+      const qr = await QRCode.toDataURL(upi);
+      doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...secondary);
+      doc.text("Scan to Pay", qrX + qrSize / 2, qrY + qrSize + 6, {
+        align: "center",
+      });
+    } catch (err) {
+      // QR generation can fail (e.g. missing UPI ID) — degrade gracefully
+      // instead of crashing the whole PDF generation.
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...secondary);
+      doc.text("QR code unavailable — pay using the UPI ID above.", qrX - 30, qrY + 10);
+    }
 
     y = Math.max(y, qrY + qrSize + 6) + 12;
   }
@@ -348,18 +370,20 @@ invoice.items.forEach((item, idx) => {
   /* ==========================================
      NOTES
   ========================================== */
+  y = ensureSpace(y, 22);
+
   doc.setDrawColor(...primary);
   doc.setLineWidth(0.4);
   doc.line(PAGE_L, y, PAGE_R, y);
   y += 9;
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont(FONT, "bold");
   doc.setFontSize(10);
   doc.setTextColor(...dark);
   doc.text("Notes", PAGE_L, y);
 
   y += 7;
-  doc.setFont("helvetica", "normal");
+  doc.setFont(FONT, "normal");
   doc.setFontSize(9);
   doc.setTextColor(...secondary);
   if (invoice.status === "Paid") {
@@ -371,16 +395,10 @@ invoice.items.forEach((item, idx) => {
   doc.text("• This invoice is electronically generated and does not require a signature.", PAGE_L + 4, y);
 
   /* ==========================================
-     FOOTER (fixed to bottom of page)
+     FOOTER (always on the last page)
   ========================================== */
-  doc.setTextColor(...dark);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("Thank you for your business.", 105, 282, { align: "center" });
-  doc.setFont("helvetica", "bold");
-  doc.text(`${settings.businessName.toUpperCase()} | ApnaKhata`, 105, 288, {
-    align: "center",
-  });
+  drawFooter();
 
-  doc.save(`HomeKitchen_${invoice.invoiceId}_${invoice.customer}.pdf`);
+  const fileSlug = settings.businessName.replace(/\s+/g, "");
+  doc.save(`${fileSlug}_${invoice.invoiceId}_${invoice.customer}.pdf`);
 }
