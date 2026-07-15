@@ -11,6 +11,7 @@ export async function generateInvoice(invoice, settings) {
   const border = [226, 232, 240];
   const dark = [17, 24, 39];
   const white = [255, 255, 255];
+  const statusColor = [34, 197, 94]; // Green
 
   const PAGE_L = 20;
   const PAGE_R = 190;
@@ -44,92 +45,114 @@ export async function generateInvoice(invoice, settings) {
   doc.setLineWidth(0.4);
   doc.line(PAGE_L, 29, PAGE_R, 29);
 
-  /* ==========================================
-     BUSINESS DETAILS (left) + INFO CARD (right)
-  ========================================== */
-  const infoBoxX = 128;
-  const infoBoxY = 44;
-  const infoBoxW = PAGE_R - infoBoxX; // 62
-  const infoBoxH = 26;
+ /* ==========================================
+   BUSINESS + INVOICE SUMMARY
+========================================== */
 
-  doc.setFillColor(...light);
-  doc.setDrawColor(...border);
-  doc.roundedRect(infoBoxX, infoBoxY, infoBoxW, infoBoxH, 2, 2, "FD");
+let y = 50;
 
-  doc.setTextColor(...dark);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("Business Information", infoBoxX + 5, infoBoxY + 8);
+// Business Name
+doc.setTextColor(...dark);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(18);
+doc.text(settings.businessName.toUpperCase(), PAGE_L, y);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Digitally Generated", infoBoxX + 5, infoBoxY + 15);
-  doc.text("No Signature Required", infoBoxX + 5, infoBoxY + 21);
+y += 2;
 
-  // Left column text — same vertical rhythm as the info card, one line each
-  doc.setTextColor(...secondary);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(settings.address, PAGE_L, 48);
-  doc.text(`Phone : +91 ${settings.phone}`, PAGE_L, 55);
-  doc.text(settings.email, PAGE_L, 62);
+// Owner
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+doc.setTextColor(...secondary);
 
-  /* ==========================================
-     DIVIDER
-  ========================================== */
-  const dividerY = infoBoxY + infoBoxH + 6; // 76
-  doc.setDrawColor(...border);
-  doc.line(PAGE_L, dividerY, PAGE_R, dividerY);
 
-  /* ==========================================
-     INVOICE META (invoice no / date / customer / phone / created)
-  ========================================== */
-  let metaY = dividerY + 8;
-  const lineGap = 7;
+y += 6;
 
-  doc.setTextColor(...dark);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(`Invoice No : ${invoice.invoiceId}`, PAGE_L, metaY);
-  
+// Address
+doc.text(settings.address, PAGE_L, y);
 
-  metaY += lineGap;
-  doc.setFont("helvetica", "normal");
-  doc.text(`Customer : ${invoice.customer}`, PAGE_L, metaY);
+y += 6;
 
-  metaY += lineGap;
-  doc.text(`Phone : +91 ${invoice.phone}`, PAGE_L, metaY);
+// Phone
+doc.text(`Phone : +91 ${settings.phone}`, PAGE_L, y);
 
-  metaY += lineGap;
-  doc.text(
-    `Date : ${new Date(invoice.createdAt).toLocaleDateString()}`,
-    PAGE_L,
-    metaY
-  );
+y += 6;
 
-  // Status badge — vertically centered against the full meta block (all 4 lines),
-  // right-aligned. Previously it was pinned level with the top line only, which
-  // made it look like it was floating above the block instead of belonging to it.
-  const statusColor = invoice.status === "Paid" ? [22, 163, 74] : [234, 88, 12];
-  const badgeW = 32;
-  const badgeH = 10;
-  const badgeX = PAGE_R - badgeW;
-  const metaBlockTop = dividerY + 8 - 3.5; // approx cap-height above first baseline
-  const metaBlockBottom = metaY + 2; // approx descender below last baseline
-  const badgeY = (metaBlockTop + metaBlockBottom) / 2 - badgeH / 2;
-  doc.setFillColor(...statusColor);
-  doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 2, 2, "F");
-  doc.setTextColor(...white);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text(invoice.status.toUpperCase(), badgeX + badgeW / 2, badgeY + 6.5, {
-    align: "center",
-  });
+// Email
+doc.text(settings.email, PAGE_L, y);
+
+
+
+/* ---------- Invoice Card ---------- */
+
+const cardX = 125;
+const cardY = 43;
+const cardW = 65;
+const cardH = 40;
+
+doc.setFillColor(...light);
+doc.setDrawColor(...border);
+doc.roundedRect(cardX, cardY, cardW, cardH, 2, 2, "FD");
+
+doc.setTextColor(...dark);
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(10);
+doc.text("Invoice Details", cardX + 5, cardY + 8);
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9);
+
+doc.text(`Invoice : ${invoice.invoiceId}`, cardX + 5, cardY + 16);
+
+doc.text(
+  `Date : ${new Date(invoice.createdAt).toLocaleDateString()}`,
+  cardX + 5,
+  cardY + 24
+);
+
+doc.text(
+  `Status : ${invoice.status}`,
+  cardX + 5,
+  cardY + 32
+);
+
+
+
+/* ---------- Divider ---------- */
+
+y = 90;
+
+doc.setDrawColor(...border);
+doc.line(PAGE_L, y, PAGE_R, y);
+
+y += 10;
+
+
+
+/* ---------- Bill To ---------- */
+
+doc.setTextColor(...dark);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+doc.text("Bill To", PAGE_L, y);
+
+y += 8;
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+
+doc.text(`Customer : ${invoice.customer}`, PAGE_L, y);
+
+y += 7;
+
+doc.text(`Phone : +91 ${invoice.phone}`, PAGE_L, y);
+
+y += 12;
 
   /* ==========================================
      ITEMS TABLE
   ========================================== */
-  let y = metaY + 14;
+// y is already positioned below Bill To
 
   const rowH = 10;
   doc.setFillColor(...primary);

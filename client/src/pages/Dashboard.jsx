@@ -157,6 +157,7 @@ const user = JSON.parse(localStorage.getItem("user"));
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         status: newStatus,
