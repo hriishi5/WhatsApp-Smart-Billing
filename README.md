@@ -10,7 +10,7 @@ Transform WhatsApp orders into professional invoices, track payments, and gain A
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)
-![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite)
+![Supabase]([https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white))
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=for-the-badge&logo=javascript)
 ![MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
