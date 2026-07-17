@@ -206,7 +206,7 @@ const user = JSON.parse(localStorage.getItem("user"));
     <div className="app">
       {/* Header */}
 
-      <header className="topbar">
+    <header className="topbar">
 
   <div className="brand">
 
@@ -223,7 +223,7 @@ const user = JSON.parse(localStorage.getItem("user"));
 
   <div className="header-stats">
 
-    <div>
+    <div className="header-stat">
 
     <span>Orders</span>
 
@@ -231,7 +231,7 @@ const user = JSON.parse(localStorage.getItem("user"));
 
   </div>
 
-  <div>
+  <div className="header-stat">
 
     <span>Status</span>
 
@@ -239,7 +239,9 @@ const user = JSON.parse(localStorage.getItem("user"));
       ● Online
     </strong>
 
+  </div> 
   </div>
+  <div className="header-actions"> 
     <button
       className="settings-btn"
       onClick={() => setShowSettings(true)}
@@ -253,8 +255,8 @@ const user = JSON.parse(localStorage.getItem("user"));
 >
   Logout
 </button>
+</div>
 
-  </div>
 
 </header>
       {/* Main Layout */}
