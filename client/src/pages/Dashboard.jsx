@@ -208,55 +208,62 @@ const user = JSON.parse(localStorage.getItem("user"));
 
     <header className="topbar">
 
-  <div className="brand">
+    <div className="brand">
 
-  <h1 className="brand-title">
-    ApnaKhata
-  </h1>
+        <h1 className="brand-title">
+            ApnaKhata
+        </h1>
 
-  <p className="brand-subtitle">
-    Smart Billing for{" "}
-    <strong>{settings?.businessName}</strong>
-  </p>
+        <p className="brand-subtitle">
+            Smart Billing for{" "}
+            <strong>{settings?.businessName}</strong>
+        </p>
 
-</div>
+    </div>
 
-  <div className="header-stats">
+    <div className="header-right">
 
-    <div className="header-stat">
+        <div className="header-stats">
 
-    <span>Orders</span>
+            <div className="header-stat">
 
-    <strong>{invoices.length}</strong>
+                <span>Orders</span>
 
-  </div>
+                <strong>{invoices.length}</strong>
 
-  <div className="header-stat">
+            </div>
 
-    <span>Status</span>
+            <div className="header-stat">
 
-    <strong className="online">
-      ● Online
-    </strong>
+                <span>Status</span>
 
-  </div> 
-  </div>
-  <div className="header-actions"> 
-    <button
-      className="settings-btn"
-      onClick={() => setShowSettings(true)}
-    >
-      ⚙
-    </button>
+                <strong className="online">
+                    ● Online
+                </strong>
 
-    <button
-  className="logout-btn"
-  onClick={handleLogout}
->
-  Logout
-</button>
-</div>
+            </div>
 
+        </div>
+
+        <div className="header-actions">
+
+            <button
+                className="settings-btn"
+                onClick={() => setShowSettings(true)}
+            >
+                ⚙
+            </button>
+
+            <button
+                className="logout-btn"
+                onClick={handleLogout}
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </div>
 
 </header>
       {/* Main Layout */}
