@@ -1,7 +1,8 @@
 require("dotenv").config();
+const pool = require("./db");
 const express = require("express");
 const cors = require("cors");
-const sqlite3 = require("sqlite3").verbose();
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -48,111 +49,6 @@ app.use(
 );
 app.use(express.json());
 
-// ---------------- DATABASE ----------------
-
-const path = require("path");
-
-const db = new sqlite3.Database(
-  path.join(__dirname, "billing.db")
-);
-
-// ---------------- CREATE TABLES ----------------
-
-db.run(`
-CREATE TABLE IF NOT EXISTS invoices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    invoiceId TEXT,
-    customer TEXT,
-    items TEXT,
-    amount INTEGER,
-    status TEXT
-)
-`);
-// Users Table
-db.run(`
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
-)
-`);
-
-// Business Table
-db.run(`
-CREATE TABLE IF NOT EXISTS businesses (
-
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-    userId INTEGER NOT NULL,
-
-    businessName TEXT NOT NULL,
-
-    ownerName TEXT NOT NULL,
-
-    phone TEXT,
-
-    upiId TEXT,
-
-    email TEXT,
-
-    address TEXT
-
-)
-`);
-// Add phone column
-db.run(
-  `ALTER TABLE invoices ADD COLUMN phone TEXT`,
-  (err) => {
-    if (err && !err.message.includes("duplicate column")) {
-      console.log(err.message);
-    }
-  }
-);
-
-// Add createdAt column
-db.run(
-  `ALTER TABLE invoices ADD COLUMN createdAt TEXT`,
-  (err) => {
-    if (err && !err.message.includes("duplicate column")) {
-      console.log(err.message);
-    }
-  }
-);
-
-db.run(
-  `ALTER TABLE invoices ADD COLUMN userId INTEGER`,
-  (err) => {
-    if (err && !err.message.includes("duplicate column")) {
-      console.log(err.message);
-    }
-  }
-);
-// Business Settings Table
-db.run(`
-CREATE TABLE IF NOT EXISTS settings (
-
-    id INTEGER PRIMARY KEY,
-
-    businessName TEXT,
-
-    ownerName TEXT,
-
-    phone TEXT,
-
-    upiNumber TEXT,
-
-    upiId TEXT,
-
-    email TEXT,
-
-    address TEXT,
-
-    logo TEXT
-
-)
-`);
-
 
 // ---------------- HOME ----------------
 
@@ -163,163 +59,161 @@ app.get("/", (req, res) => {
 // ---------------- REGISTER ----------------
 
 app.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    console.log("📩 Register Request:", req.body);
 
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      message: "All fields are required",
-    });
-  }
-
-  db.get(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    async (err, user) => {
-
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      if (user) {
-        return res.status(400).json({
-          message: "User already exists",
-        });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      db.run(
-        `INSERT INTO users(name, email, password)
-         VALUES(?,?,?)`,
-        [name, email, hashedPassword],
-        function (err) {
-
-          if (err) {
-            return res.status(500).json(err);
-          }
-
-          res.json({
-            success: true,
-            message: "User registered successfully",
-          });
-
-        }
-      );
-
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
-  );
 
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      `INSERT INTO users(name,email,password)
+       VALUES($1,$2,$3)`,
+      [name, email, hashedPassword]
+    );
+    console.log("✅ User inserted into Supabase");
+
+    res.json({
+      success: true,
+      message: "User registered successfully",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- LOGIN ----------------
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "Email and password are required",
-    });
-  }
-
-  db.get(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    async (err, user) => {
-
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      if (!user) {
-        return res.status(400).json({
-          message: "User not found",
-        });
-      }
-
-      const isMatch = await bcrypt.compare(
-        password,
-        user.password
-      );
-
-      if (!isMatch) {
-        return res.status(400).json({
-          message: "Invalid password",
-        });
-      }
-
-      const token = jwt.sign(
-  {
-    id: user.id,
-    email: user.email,
-  },
-  JWT_SECRET,
-  {
-    expiresIn: "7d",
-  }
-);
-
-db.get(
-  "SELECT * FROM businesses WHERE userId = ?",
-  [user.id],
-  (err, business) => {
-    if (err) {
-      return res.status(500).json(err);
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
+
+    // Find user
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Compare password
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid password",
+      });
+    }
+
+    // JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    // Check if business exists
+    const businessResult = await pool.query(
+      "SELECT * FROM businesses WHERE userid = $1",
+      [user.id]
+    );
 
     res.json({
       success: true,
       message: "Login Successful",
       token,
-      hasBusiness: !!business,
+      hasBusiness: businessResult.rows.length > 0,
       user: {
-  id: user.id,
-  name: user.name,
-  email: user.email,
-},
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
     });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
   }
-);
-
-    }
-  );
-
 });
 
 // ---------------- SAVE BUSINESS ----------------
 
-app.post("/business", authenticateToken, (req, res) => {
+app.post("/business", authenticateToken, async (req, res) => {
+  try {
+    const {
+      businessName,
+      ownerName,
+      phone,
+      upiId,
+      email,
+      address,
+    } = req.body;
 
-  const {
-    businessName,
-    ownerName,
-    phone,
-    upiId,
-    email,
-    address,
-} = req.body;
+    const userId = req.user.id;
 
-const userId = req.user.id;
+    // Check if business already exists
+    const existingBusiness = await pool.query(
+      "SELECT * FROM businesses WHERE userid = $1",
+      [userId]
+    );
 
-  db.get(
-  "SELECT * FROM businesses WHERE userId = ?",
-  [userId],
-  (err, business) => {
-
-    if (err) {
-      return res.status(500).json(err);
-    }
-
-    if (business) {
+    if (existingBusiness.rows.length > 0) {
       return res.json({
         success: true,
         message: "Business already exists",
       });
     }
 
-    db.run(
+    // Insert business
+    await pool.query(
       `INSERT INTO businesses
       (
         userId,
@@ -330,7 +224,7 @@ const userId = req.user.id;
         email,
         address
       )
-      VALUES(?,?,?,?,?,?,?)`,
+      VALUES($1,$2,$3,$4,$5,$6,$7)`,
       [
         userId,
         businessName,
@@ -339,346 +233,347 @@ const userId = req.user.id;
         upiId,
         email,
         address,
-      ],
-      function (err) {
-
-        if (err) {
-          return res.status(500).json(err);
-        }
-
-        res.json({
-          success: true,
-          message: "Business saved successfully",
-        });
-
-      }
+      ]
     );
 
-  }
-);
+    res.json({
+      success: true,
+      message: "Business saved successfully",
+    });
 
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- GET BUSINESS ----------------
 
-app.get("/business", authenticateToken, (req, res) => {
+app.get("/business", authenticateToken, async (req, res) => {
+  try {
 
-  db.get(
-    "SELECT * FROM businesses WHERE userId = ?",
-    [req.user.id],
-    (err, row) => {
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        userid AS "userId",
+        businessname AS "businessName",
+        ownername AS "ownerName",
+        phone,
+        upiid AS "upiId",
+        email,
+        address
+      FROM businesses
+      WHERE userid = $1
+      `,
+      [req.user.id]
+    );
 
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json(row);
-
+    if (result.rows.length === 0) {
+      return res.json(null);
     }
-  );
 
+    res.json(result.rows[0]);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- UPDATE BUSINESS ----------------
 
-app.put("/business", authenticateToken, (req,res)=>{
-
-  const {
-    businessName,
-    ownerName,
-    phone,
-    upiId,
-    email,
-    address,
-  } = req.body;
-
-  db.run(
-    `UPDATE businesses
-     SET
-       businessName = ?,
-       ownerName = ?,
-       phone = ?,
-       upiId = ?,
-       email = ?,
-       address = ?
-     WHERE userId = ?`,
-    [
+app.put("/business", authenticateToken, async (req, res) => {
+  try {
+    const {
       businessName,
       ownerName,
       phone,
       upiId,
       email,
       address,
-      req.user.id,
-    ],
-    function (err) {
+    } = req.body;
 
-      if (err) {
-        return res.status(500).json(err);
-      }
+    await pool.query(
+      `
+      UPDATE businesses
+      SET
+        businessname = $1,
+        ownername = $2,
+        phone = $3,
+        upiid = $4,
+        email = $5,
+        address = $6
+      WHERE userid = $7
+      `,
+      [
+        businessName,
+        ownerName,
+        phone,
+        upiId,
+        email,
+        address,
+        req.user.id,
+      ]
+    );
 
-      res.json({
-        success: true,
-      });
+    res.json({
+      success: true,
+    });
 
-    }
-  );
+  } catch (err) {
 
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- GENERATE INVOICE ID ----------------
 
-function generateInvoiceId(userId, callback){
+async function generateInvoiceId(userId) {
+  // Get business name
+  const businessResult = await pool.query(
+    `
+    SELECT businessname AS "businessName"
+    FROM businesses
+    WHERE userid = $1
+    `,
+    [userId]
+  );
 
-    db.get(
-        "SELECT businessName FROM businesses WHERE userId = ?",
-        [userId],
-        (err, setting) => {
+  const businessName =
+    businessResult.rows[0]?.businessName || "COS";
 
-            if (err) {
-                return callback(err);
-            }
+  const businessCode = businessName
+    .replace(/[^A-Za-z]/g, "")
+    .substring(0, 3)
+    .toUpperCase();
 
-            const businessCode = (setting?.businessName || "COS")
-                .replace(/[^A-Za-z]/g, "")
-                .substring(0, 3)
-                .toUpperCase();
+  const now = new Date();
 
-            const now = new Date();
+  const year = now.getFullYear().toString().slice(-2);
 
-            const year =
-                now
-                    .getFullYear()
-                    .toString()
-                    .slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, "0");
 
-            const month =
-                String(now.getMonth() + 1)
-                    .padStart(2, "0");
+  const prefix = `${businessCode}-${year}${month}`;
 
-            const prefix =
-                `${businessCode}-${year}${month}`;
+  // Get latest invoice
+  const invoiceResult = await pool.query(
+    `
+    SELECT invoiceid AS "invoiceId"
+    FROM invoices
+    WHERE userid = $1
+      AND invoiceid LIKE $2
+    ORDER BY id DESC
+    LIMIT 1
+    `,
+    [userId, `${prefix}-%`]
+  );
 
-            db.get(
+  let sequence = 1;
 
-                `SELECT invoiceId
-FROM invoices
-WHERE userId = ?
-AND invoiceId LIKE ?
-ORDER BY id DESC
-LIMIT 1`,
-
-                [userId, `${prefix}-%`],
-
-                (err, row) => {
-
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    let sequence = 1;
-
-                    if (row && row.invoiceId) {
-
-                        const last =
-                            parseInt(
-                                row.invoiceId.split("-")[2]
-                            );
-
-                        sequence = last + 1;
-
-                    }
-
-                    const invoiceId =
-                        `${prefix}-${String(sequence).padStart(4, "0")}`;
-
-                    callback(null, invoiceId);
-
-                }
-
-            );
-
-        }
-
+  if (invoiceResult.rows.length > 0) {
+    const last = parseInt(
+      invoiceResult.rows[0].invoiceId.split("-")[2]
     );
 
+    sequence = last + 1;
+  }
+
+  return `${prefix}-${String(sequence).padStart(4, "0")}`;
 }
 
 // ---------------- SAVE INVOICE ----------------
 
-app.post("/invoice", authenticateToken, (req, res) => {
+app.post("/invoice", authenticateToken, async (req, res) => {
+  try {
+    const {
+      customer,
+      phone,
+      items,
+      amount,
+      status,
+      createdAt,
+    } = req.body;
 
-   const {
+    const userId = req.user.id;
 
-  customer,
+    const invoiceId = await generateInvoiceId(userId);
 
-  phone,
-
-  items,
-
-  amount,
-
-  status,
-
-  createdAt
-
-} = req.body;
-
-const userId = req.user.id;
-
-    console.log("Saving Invoice:", req.body);
-
-    generateInvoiceId(userId, (err, invoiceId) => {
-
-    if (err) {
-
-        console.log(err);
-
-        return res.status(500).json(err);
-
-    }
-
-    db.run(
-
-        `INSERT INTO invoices
-(
-    invoiceId,
-    userId,
-    customer,
-    phone,
-    items,
-    amount,
-    status,
-    createdAt
-)
-VALUES(?,?,?,?,?,?,?,?)`,
-
-        [
-
-            
-    invoiceId,
-    userId,
-    customer,
-    phone,
-    JSON.stringify(items),
-    amount,
-    status,
-    createdAt
-
-
-        ],
-
-        function(err){
-
-            if(err){
-
-                console.log(err);
-
-                return res.status(500).json(err);
-
-            }
-
-            res.json({
-
-                success:true,
-
-                invoiceId,
-
-                id:this.lastID
-
-            });
-
-        }
-
+    await pool.query(
+      `
+      INSERT INTO invoices
+      (
+        invoiceid,
+        userid,
+        customer,
+        phone,
+        items,
+        amount,
+        status,
+        createdat
+      )
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+      `,
+      [
+        invoiceId,
+        userId,
+        customer,
+        phone,
+        JSON.stringify(items),
+        amount,
+        status,
+        createdAt,
+      ]
     );
 
-});
+    res.json({
+      success: true,
+      invoiceId,
+    });
 
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- GET ALL INVOICES ----------------
 
-app.get("/invoices", authenticateToken, (req, res) => {
+app.get("/invoices", authenticateToken, async (req, res) => {
+  try {
 
-    const userId = req.user.id;
-
-    db.all(
-
-        "SELECT * FROM invoices WHERE userId = ? ORDER BY id DESC",
-
-        [userId],
-
-        (err, rows) => {
-
-            if (err) {
-                return res.status(500).json(err);
-            }
-
-            rows.forEach((row) => {
-                row.items = JSON.parse(row.items);
-            });
-
-            res.json(rows);
-
-        }
-
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        invoiceid AS "invoiceId",
+        userid AS "userId",
+        customer,
+        phone,
+        items,
+        amount,
+        status,
+        createdat AS "createdAt"
+      FROM invoices
+      WHERE userid = $1
+      ORDER BY id DESC
+      `,
+      [req.user.id]
     );
 
-});
+    const invoices = result.rows.map((invoice) => ({
+      ...invoice,
+      items: JSON.parse(invoice.items),
+    }));
 
+    res.json(invoices);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+});
 // ---------------- MARK AS PAID ----------------
 
-app.put("/invoice/:invoiceId",authenticateToken, (req, res) => {
+app.put("/invoice/:invoiceId", authenticateToken, async (req, res) => {
+  try {
 
-  const { status } = req.body;
+    const { status } = req.body;
 
-  db.run(
-    `UPDATE invoices
-SET status=?
-WHERE invoiceId=?
-AND userId=?`,
-    [status, req.params.invoiceId, req.user.id],
-    function(err){
+    await pool.query(
+      `
+      UPDATE invoices
+      SET status = $1
+      WHERE invoiceid = $2
+      AND userid = $3
+      `,
+      [
+        status,
+        req.params.invoiceId,
+        req.user.id,
+      ]
+    );
 
-      if(err){
-        return res.status(500).json(err);
-      }
+    res.json({
+      success: true,
+    });
 
-      res.json({ success:true });
+  } catch (err) {
 
-    }
-  );
+    console.error(err);
 
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
 // ---------------- DELETE INVOICE ----------------
 
-app.delete("/invoice/:invoiceId",authenticateToken, (req, res) => {
+app.delete("/invoice/:invoiceId", authenticateToken, async (req, res) => {
+  try {
 
-    const invoiceId = req.params.invoiceId;
-
-    db.run(
-
-        "DELETE FROM invoices WHERE invoiceId=? AND userId=?",
-
-        [invoiceId, req.user.id],
-
-        function(err){
-
-            if(err){
-                return res.status(500).json(err);
-            }
-
-            res.json({
-                success:true
-            });
-
-        }
-
+    await pool.query(
+      `
+      DELETE FROM invoices
+      WHERE invoiceid = $1
+      AND userid = $2
+      `,
+      [
+        req.params.invoiceId,
+        req.user.id,
+      ]
     );
 
+    res.json({
+      success: true,
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
 });
 
+pool.query("SELECT NOW()")
+  .then((result) => {
+    console.log("✅ Connected to Supabase!");
+    console.log("Database Time:", result.rows[0].now);
+  })
+  .catch((err) => {
+    console.error("❌ Supabase Connection Failed:", err.message);
+  });
 
 // ---------------- START SERVER ----------------
 
