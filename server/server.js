@@ -83,8 +83,20 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await pool.query(
-      `INSERT INTO users(name,email,password)
-       VALUES($1,$2,$3)`,
+      `INSERT INTO users
+(
+    name,
+    email,
+    password
+    
+)
+VALUES
+(
+    $1,
+    $2,
+    $3
+    
+)`,
       [name, email, hashedPassword]
     );
     console.log("✅ User inserted into Supabase");
@@ -170,6 +182,7 @@ app.post("/login", async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        language:user.language
       },
     });
 
@@ -564,6 +577,42 @@ app.delete("/invoice/:invoiceId", authenticateToken, async (req, res) => {
     });
 
   }
+});
+
+// ---------------- UPDATE USER LANGUAGE ----------------
+
+app.put("/language", authenticateToken, async (req, res) => {
+
+  try {
+
+    const { language } = req.body;
+
+    await pool.query(
+      `
+      UPDATE users
+      SET language = $1
+      WHERE id = $2
+      `,
+      [
+        language,
+        req.user.id,
+      ]
+    );
+
+    res.json({
+      success: true,
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+
 });
 
 pool.query("SELECT NOW()")

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BusinessSettings.css";
+import { useLanguage } from "../../context/LanguageContext";
 
 function BusinessSettings({
   onClose,
@@ -15,7 +16,10 @@ function BusinessSettings({
     upiId: "",  
     email: "",
     address: "",
-  });
+  }); 
+  const { language, setLanguage, t } = useLanguage(); 
+  console.log("Language:", language);
+console.log("Save Changes:", t.saveChanges);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   useEffect(() => {
@@ -68,7 +72,7 @@ function BusinessSettings({
 
   if (data.success) {
 
-  alert("Business Profile Created!");
+  alert(t.businessProfileCreated);
 
   navigate("/dashboard");
 
@@ -108,26 +112,26 @@ if (data.success) {
       <div className="settings-box">
 
        <h2>
-  {setupMode ? "Business Setup" : "Business Settings"}
+  {setupMode ? t.businessSetup : t.businessSettings}
 </h2>
 
         <input
           name="businessName"
-          placeholder="Business Name"
+          placeholder={t.businessName}
           value={settings.businessName}
           onChange={handleChange}
         />
 
         <input
           name="ownerName"
-          placeholder="Owner Name"
+          placeholder={t.ownerName}
           value={settings.ownerName}
           onChange={handleChange}
         />
 
         <input
           name="phone"
-          placeholder="Phone"
+          placeholder={t.phone}
           value={settings.phone}
           onChange={handleChange}
         />
@@ -136,24 +140,36 @@ if (data.success) {
 
         <input
           name="upiId"
-          placeholder="UPI ID"
+          placeholder={t.upiId}
           value={settings.upiId}
           onChange={handleChange}
         />
 
         <input
           name="email"
-          placeholder="Email"
+          placeholder={t.email}
           value={settings.email}
           onChange={handleChange}
         />
 
         <textarea
           name="address"
-          placeholder="Address"
+          placeholder={t.address}
           value={settings.address}
           onChange={handleChange}
-        />
+        /> 
+
+        <div className="language-setting">
+  <label>{t.language}</label>
+
+  <select
+    value={language}
+    onChange={(e) => setLanguage(e.target.value)}
+  >
+    <option value="en">{t.english}</option>
+    <option value="kn">{t.kannada}</option>
+  </select>
+</div>
 
         <div className="settings-buttons">
 
@@ -162,7 +178,7 @@ if (data.success) {
     className="cancel-btn"
     onClick={onClose}
   >
-    Cancel
+    {t.cancel}
   </button>
 )}
 
@@ -170,7 +186,7 @@ if (data.success) {
             className="save-btn"
             onClick={handleSave}
           >
-            {setupMode ? "Continue" : "Save Changes"}
+            {setupMode ? t.continue : t.saveChanges}
           </button>
 
         </div>

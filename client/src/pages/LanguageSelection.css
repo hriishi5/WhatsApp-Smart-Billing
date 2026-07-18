@@ -1,0 +1,81 @@
+.language-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#f5f7fb;
+
+}
+
+.language-card{
+
+    width:420px;
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:40px;
+
+    text-align:center;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.language-icon{
+
+    font-size:60px;
+
+}
+
+.language-card h1{
+
+    margin-top:20px;
+
+    color:#075E54;
+
+}
+
+.language-card p{
+
+    color:#666;
+
+    margin:20px 0;
+
+}
+
+.language-btn{
+
+    width:100%;
+
+    padding:18px;
+
+    margin-top:18px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    background:#075E54;
+
+    color:white;
+
+    transition:.3s;
+
+}
+
+.language-btn:hover{
+
+    transform:translateY(-2px);
+
+}

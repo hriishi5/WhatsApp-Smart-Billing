@@ -1,5 +1,5 @@
 import "./Chat.css";
-
+import { useLanguage } from "../../context/LanguageContext";
 function Chat({
     messages,
     message,
@@ -23,7 +23,7 @@ const avatarColor =
     (settings?.businessName?.length || 0) %
     colors.length
   ];
-
+  const { t } = useLanguage();
   
   return (
     <>
@@ -46,7 +46,7 @@ const avatarColor =
 
         <div>
           <h3>ApnaKhata</h3>
-          <p>🟢 Online</p>
+          <p>🟢 {t.online}</p>
         </div>
       </div>
 
@@ -57,11 +57,11 @@ const avatarColor =
   <div className="welcome-card">
 
     <h2>
-      Welcome back, {settings?.ownerName} 👋
+      {t.welcomeBack}, {settings?.ownerName} 👋
     </h2>
 
     <p>
-      Ready to generate today's invoices?
+      {t.readyToGenerate}
     </p>
 
   </div>
@@ -86,7 +86,7 @@ const avatarColor =
       <div className="chat-input">
 
         <textarea
-          placeholder={`Example:
+          placeholder={`${t.example}:
 
 Rahul
 7899458206
@@ -103,7 +103,7 @@ Rahul
     className="generate-btn"
     onClick={handleSend}
 >
-    📤 Generate Invoice
+    📤 {t.generateInvoice}
 </button>
 
       </div>

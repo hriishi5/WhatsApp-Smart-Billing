@@ -1,12 +1,13 @@
 import "./DashboardCard.css";
 import { useState } from "react";
 import PendingPaymentsModal from "../PendingPaymentsModal/PendingPaymentsModal";
-
+import { useLanguage } from "../../context/LanguageContext";
 function Dashboard({ invoices, onSelectInvoice }) {
   // ---------------- Statistics ----------------
   const [showTopProducts, setShowTopProducts] = useState(false);
 const [showPendingModal, setShowPendingModal] =
-useState(false);
+useState(false); 
+const { t } = useLanguage();
   const totalRevenue = invoices
     .filter((i) => i.status === "Paid")
     .reduce((sum, i) => sum + Number(i.amount), 0);
@@ -17,6 +18,7 @@ useState(false);
 
   const totalOrders = invoices.length;
 
+  
   // ---------------- Top Item ----------------
 // ---------------- Top Selling Products ----------------
 
@@ -152,10 +154,10 @@ topThreeCounts.forEach((count, index) => {
 
       <div className="dashboard-header">
 
-        <h2>Financial Dashboard</h2>
+        <h2>{t.financialDashboard}</h2>
 
         <p>
-          Monitor revenue and outstanding payments.
+          {t.monitorRevenue}
         </p>
 
       </div>
@@ -164,73 +166,63 @@ topThreeCounts.forEach((count, index) => {
 
       <div className="dashboard-cards">
 
-        <div className="dashboard-card">
-
-          <span>Total Revenue</span>
-
-          <h2>
-            ₹{totalRevenue.toLocaleString("en-IN")}
-          </h2>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <span>Pending</span>
-
-          <h2>
-            ₹{pendingAmount.toLocaleString("en-IN")}
-          </h2>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <span>Total Orders</span>
-
-          <h2>{totalOrders}</h2>
-
-        </div>
-
-       <div className="dashboard-card">
-
-    <span>Top Selling</span>
+  <div className="dashboard-card">
+    <span>{t.totalRevenue}</span>
 
     <h2>
+      ₹{totalRevenue.toLocaleString("en-IN")}
+    </h2>
+  </div>
 
-        {topProducts.length === 0
-            ? "-"
-            : `${topProducts.length} Product${topProducts.length > 1 ? "s" : ""}`}
+  <div className="dashboard-card">
+    <span>{t.pending}</span>
 
+    <h2>
+      ₹{pendingAmount.toLocaleString("en-IN")}
+    </h2>
+  </div>
+
+  <div className="dashboard-card">
+    <span>{t.totalOrders}</span>
+
+    <h2>{totalOrders}</h2>
+  </div>
+
+  <div className="dashboard-card">
+    <span>{t.topSelling}</span>
+
+    <h2>
+      {topProducts.length === 0
+        ? "-"
+        : `${topProducts.length} ${
+            topProducts.length > 1 ? t.products : t.product
+          }`}
     </h2>
 
     {topProducts.length > 0 && (
-
-        <button
-            className="view-products-btn"
-            onClick={() => setShowTopProducts(true)}
-        >
-            View →
-        </button>
-
+      <button
+        className="view-products-btn"
+        onClick={() => setShowTopProducts(true)}
+      >
+        {t.view}
+      </button>
     )}
+  </div>
 
 </div>
-      </div>
       
 
     
 
       {/* Pending Payments */}
-
 <div className="pending-payments">
 
   <div className="pending-header">
 
-    <h3>Pending Payments</h3>
+    <h3>{t.pendingPayments}</h3>
 
     <span>
-      {pendingInvoices.length} Pending
+      {pendingInvoices.length} {t.pending}
     </span>
 
   </div>
@@ -238,8 +230,7 @@ topThreeCounts.forEach((count, index) => {
   {pendingInvoices.length === 0 ? (
 
     <div className="empty-state">
-      <p>✅ You're all caught up! 
-      No pending payments.</p>
+      <p>{t.noPendingPayments}</p>
     </div>
 
   ) : (
@@ -247,27 +238,19 @@ topThreeCounts.forEach((count, index) => {
     <>
       {pendingInvoices.slice(0, 2).map((invoice) => {
 
-        let pendingDays = "Today";
+        let pendingDays = t.today;
 
         if (invoice.createdAt) {
 
           const diff = Math.floor(
-
             (Date.now() - new Date(invoice.createdAt)) /
-
             (1000 * 60 * 60 * 24)
-
           );
 
           if (diff > 0) {
-
-            pendingDays = `${diff} day(s)`;
-
+            pendingDays = `${diff} ${t.days}`;
           }
-
         }
-
-        
 
         return (
 
@@ -278,23 +261,16 @@ topThreeCounts.forEach((count, index) => {
           >
 
             <div>
-
               <h4>{invoice.customer}</h4>
-
               <p>{invoice.phone}</p>
-
               <small>{pendingDays}</small>
-
             </div>
 
             <div className="payment-right">
-
               <h3>₹{invoice.amount}</h3>
-
             </div>
 
           </div>
-
         );
 
       })}
@@ -305,9 +281,7 @@ topThreeCounts.forEach((count, index) => {
           className="view-all-btn"
           onClick={() => setShowPendingModal(true)}
         >
-
-          View All
-
+          {t.viewAll}
         </button>
 
       )}
@@ -337,7 +311,7 @@ topThreeCounts.forEach((count, index) => {
     onClick={(e) => e.stopPropagation()}
 >
 
-<h2>🏆 Top Selling Products</h2>
+<h2>🏆 {t.topSellingProducts}</h2>
 
 <div className="top-products-list">
 
@@ -360,9 +334,7 @@ return(
 </div>
 
 <span>
-
-{count} Order{count>1?"s":""}
-
+  {count} {count > 1 ? t.orders : t.order}
 </span>
 
 </div>
@@ -378,7 +350,7 @@ className="close-modal-btn"
 onClick={()=>setShowTopProducts(false)}
 >
 
-Close
+{t.close}
 
 </button>
 

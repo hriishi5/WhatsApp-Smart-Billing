@@ -47,10 +47,14 @@ const navigate = useNavigate();
   );
 
  
- if (data.hasBusiness) {
-  navigate("/dashboard");
-} else {
-  navigate("/business-setup");
+ if(data.hasBusiness){
+
+    navigate("/dashboard");
+
+}else{
+
+    navigate("/language");
+
 }
 
 

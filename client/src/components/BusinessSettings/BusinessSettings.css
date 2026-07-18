@@ -131,4 +131,39 @@ cursor:pointer;
 
 font-weight:600;
 
+} 
+
+.language-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.language-setting label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.language-setting select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: white;
+  font-size: 15px;
+  cursor: pointer;
+  outline: none;
+}
+
+.language-setting select:focus {
+  border-color: #0f766e;
+}
+
+.save-btn {
+  min-width: 130px;
+  padding: 12px 20px;
+  color: white;
+  white-space: nowrap;
 }
