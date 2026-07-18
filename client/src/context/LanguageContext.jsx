@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 
-import en from "../translations/en";
-import kn from "../translations/kn";
+import en from "../Translations/en";
+import kn from "../Translations/kn";
 
 const LanguageContext = createContext();
 
