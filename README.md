@@ -1,18 +1,19 @@
 <div align="center">
 
-# 📱 WhatsApp Smart Billing Assistant
+# 📱 ApnaKhata — WhatsApp Smart Billing Assistant
 
-### AI-Powered Billing Platform for Small Businesses
+### Smart Billing & Payment Management Platform for Small Businesses
 
-Transform WhatsApp orders into professional invoices, track payments, and gain AI-powered business insights.
+Transform WhatsApp orders into professional invoices, track payments, manage your business, and gain AI-powered insights — all from one simple platform.
 
 <br>
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E?style=for-the-badge&logo=supabase)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=for-the-badge&logo=javascript)
-![MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?style=for-the-badge&logo=vercel)
+![Render](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render)
 
 <br>
 
@@ -24,16 +25,13 @@ Transform WhatsApp orders into professional invoices, track payments, and gain A
 
 # ✨ Overview
 
-**WhatsApp Smart Billing Assistant** is a lightweight billing platform built for businesses that receive customer orders through **WhatsApp**.
+**ApnaKhata — WhatsApp Smart Billing Assistant** is a lightweight smart billing platform designed for small and home-based businesses that receive customer orders through **WhatsApp**.
 
-Instead of creating invoices manually, simply paste the customer's message and the application automatically:
+Instead of manually creating bills and tracking payments, sellers can paste customer order details into the application and automatically generate structured invoices.
 
-- 🧾 Generates Professional Invoices
-- 📄 Exports Printable PDF Bills
-- 💳 Tracks Payment Status
-- 📲 Sends WhatsApp Payment Reminders
-- 🤖 Provides AI Sales Insights
-- 📊 Displays Business Analytics
+The platform also provides secure user authentication, business-specific data management, payment tracking, business analytics, AI-powered insights, and regional language support.
+
+The application currently supports **English and Kannada**, helping make digital billing more accessible to regional-language users.
 
 ---
 
@@ -42,31 +40,99 @@ Instead of creating invoices manually, simply paste the customer's message and t
 <p align="center">
   <img src="./client/screenshots/home-page.png" width="100%">
 </p>
+
 ---
 
 # 🚀 Features
 
 | Feature | Description |
 |---------|-------------|
-| 📱 WhatsApp Parser | Convert WhatsApp messages into structured orders |
+| 🔐 User Authentication | Secure user registration and login |
+| 🏪 Business Profiles | Each user can create and manage their own business profile |
+| 📱 WhatsApp Order Parser | Convert WhatsApp-style order messages into structured orders |
 | 🧾 Smart Invoice | Automatically generate professional invoices |
-| 📄 PDF Export | Download beautifully formatted invoices |
-| 💳 Payment Tracking | Toggle between Paid and Pending |
-| 📲 WhatsApp Reminder | Send payment reminders instantly |
-| 📊 Dashboard | Revenue, Orders & Pending Collections |
-| 🤖 AI Assistant | Daily business summary and recommendations |
-| 🔍 Invoice History | Search and manage invoices |
-| ⚙ Business Settings | Customize business profile & UPI |
+| 📄 PDF Export | Generate and download printable PDF invoices |
+| 💳 Payment Tracking | Track invoices as Paid or Pending |
+| 📲 WhatsApp Reminder | Send payment reminders to customers |
+| 📊 Financial Dashboard | Monitor revenue, total orders, pending payments, and top-selling products |
+| 🏆 Product Insights | Identify top-selling products based on order history |
+| 🤖 AI Assistant | Get business summaries and intelligent recommendations |
+| 🔍 Invoice History | Search, view, and manage previous invoices |
+| ⚙️ Business Settings | Manage business details, contact information, UPI details, and preferences |
+| 🌐 Regional Language Support | Switch the application interface between English and Kannada |
+| ☁️ Cloud Database | Store user, business, and invoice data using Supabase PostgreSQL |
+| 🔒 User-Specific Data | Business profiles and invoices are associated with individual authenticated users |
+
+---
+
+# 🌐 Regional Language Support
+
+ApnaKhata is designed with accessibility for regional businesses in mind.
+
+The application currently supports:
+
+- 🇬🇧 **English**
+- 🇮🇳 **Kannada (ಕನ್ನಡ)**
+
+Users can select their preferred language and switch between English and Kannada through the Business Settings interface.
+
+The selected language dynamically updates supported sections of the application, including the financial dashboard, business settings, and other localized interface elements.
+
+Additional Indian regional languages can be integrated in future versions.
+
+---
+
+# 🔐 Authentication & User Management
+
+The platform includes a dedicated authentication system that allows users to:
+
+- Create a new account
+- Securely log in to their account
+- Access their own business dashboard
+- Create and update their business profile
+- Access only their associated invoices and business data
+- Securely log out
+
+Authentication is handled using **JWT (JSON Web Tokens)**, while passwords are securely hashed before being stored.
 
 ---
 
 # 🛠 Tech Stack
 
-| Frontend | Backend | Database | Libraries |
-|-----------|----------|----------|------------|
-| React | Node.js | SQLite | jsPDF |
-| CSS | Express.js | | QRCode |
-| React Icons | REST API | | React QR Code |
+| Frontend | Backend | Database | Libraries / Services |
+|-----------|---------|----------|----------------------|
+| React 19 | Node.js | Supabase PostgreSQL | jsPDF |
+| Vite | Express.js | PostgreSQL | React QR Code |
+| CSS | REST API | | bcryptjs |
+| React Router | JWT Authentication | | JSON Web Token |
+| React Icons | | | QRCode |
+
+---
+
+# ☁️ Deployment Architecture
+
+The application uses a cloud-based deployment architecture:
+
+```text
+User
+  │
+  ▼
+React Frontend
+(Vercel)
+  │
+  │ REST API
+  ▼
+Node.js + Express Backend
+(Render)
+  │
+  ▼
+Supabase PostgreSQL
+(Cloud Database)
+```
+
+- **Frontend:** Deployed on Vercel
+- **Backend:** Deployed on Render
+- **Database:** Hosted using Supabase PostgreSQL
 
 ---
 
@@ -77,11 +143,24 @@ WhatsApp-Smart-Billing
 │
 ├── client
 │   ├── screenshots
-│   ├── src
-│   └── public
+│   ├── public
+│   └── src
+│       ├── assets
+│       ├── components
+│       ├── context
+│       │   └── LanguageContext.jsx
+│       ├── pages
+│       │   ├── Login.jsx
+│       │   ├── Register.jsx
+│       │   ├── BusinessSetup.jsx
+│       │   └── Dashboard.jsx
+│       ├── translations
+│       │   ├── en.js
+│       │   └── kn.js
+│       └── utils
 │
 ├── server
-│   ├── billing.db
+│   ├── db.js
 │   └── server.js
 │
 └── README.md
@@ -91,55 +170,121 @@ WhatsApp-Smart-Billing
 
 # ⚡ Getting Started
 
-### Clone Repository
+## 1. Clone Repository
 
 ```bash
 git clone https://github.com/hriishi5/WhatsApp-Smart-Billing.git
+cd WhatsApp-Smart-Billing
 ```
 
-### Backend
+---
+
+## 2. Backend Setup
 
 ```bash
 cd server
 npm install
-node server.js
 ```
 
-Runs on
+Create a `.env` file inside the `server` directory:
 
+```env
+DATABASE_URL=your_supabase_postgresql_connection_string
+JWT_SECRET=your_jwt_secret
 ```
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+or:
+
+```bash
+npm start
+```
+
+The backend runs locally on:
+
+```text
 http://localhost:5000
 ```
 
-### Frontend
+---
+
+## 3. Frontend Setup
 
 ```bash
 cd client
 npm install
+```
+
+Create a `.env` file inside the `client` directory:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
 
-Runs on
+The frontend runs locally on:
 
-```
+```text
 http://localhost:5173
 ```
 
 ---
 
+# 🗄️ Database
+
+The project uses **Supabase PostgreSQL** as its cloud database.
+
+The database stores information related to:
+
+- Users
+- Business profiles
+- Invoices
+- Payment status
+- Customer and order information
+
+Each business and invoice is associated with its respective authenticated user, allowing multiple users to maintain independent business data.
+
+---
+
 # 🌟 Highlights
+
+✅ Secure User Registration & Login
+
+✅ User-Specific Business Profiles
+
+✅ Supabase PostgreSQL Cloud Database
+
+✅ Dynamic Invoice Generation
 
 ✅ Dynamic Monthly Invoice IDs
 
-✅ QR Code Payment Support
+✅ QR Code / UPI Payment Support
 
-✅ AI Sales Assistant
+✅ Professional PDF Invoice Generation
 
-✅ Professional PDF Generation
+✅ Paid & Pending Payment Tracking
 
-✅ Business Analytics Dashboard
+✅ WhatsApp Payment Reminders
 
-✅ Payment Reminder Integration
+✅ Financial Analytics Dashboard
+
+✅ Top-Selling Product Insights
+
+✅ AI Business Assistant
+
+✅ English & Kannada Localization
+
+✅ Cloud-Deployed Frontend and Backend
 
 ---
 
@@ -147,14 +292,17 @@ http://localhost:5173
 
 The project is actively evolving with several planned enhancements:
 
+- 🌐 Support for additional Indian regional languages
 - 📦 Inventory & Stock Management
-- 💳 Automated Payment Verification through payment gateways (Razorpay, PhonePe, Stripe)
+- 💳 Automated Payment Verification through payment gateways
 - 📧 Email Invoice & Digital Receipt Generation
 - 📊 Detailed Sales Analytics & Exportable Reports
-- 👥 Multi-user Authentication with Role-Based Access Control
-- ☁️ Cloud Deployment with Real-time Data Synchronization
+- 👥 Role-Based Access Control for business teams
 - 📱 Native Mobile Application for Android & iOS
 - 🤖 AI-powered Sales Forecasting and Business Recommendations
+- 🔔 Automated Payment Notifications
+- 📈 Advanced Business Performance Analytics
+
 ---
 
 <div align="center">
@@ -165,7 +313,7 @@ The project is actively evolving with several planned enhancements:
 
 B.Tech Students
 
-Made with ❤️ using React & Node.js
+Made with ❤️ using React, Node.js & Supabase
 
 ⭐ **If you like this project, consider giving it a Star!**
 
